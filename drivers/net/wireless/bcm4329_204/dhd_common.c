@@ -555,6 +555,7 @@ wl_show_host_event(wl_event_msg_t *event, void *event_data)
 	flags = ntoh16(event->flags);
 	status = ntoh32(event->status);
 	reason = ntoh32(event->reason);
+	(void)reason;
 	auth_type = ntoh32(event->auth_type);
 	datalen = ntoh32(event->datalen);
 	/* debug dump of event messages */
@@ -576,10 +577,13 @@ wl_show_host_event(wl_event_msg_t *event, void *event_data)
 
 	if (flags & WLC_EVENT_MSG_LINK)
 		link = TRUE;
+	(void)link;
 	if (flags & WLC_EVENT_MSG_GROUP)
 		group = TRUE;
+	(void)group;
 	if (flags & WLC_EVENT_MSG_FLUSHTXQ)
 		flush_txq = TRUE;
+	(void)flush_txq;
 
 	switch (event_type) {
 	case WLC_E_START:
@@ -645,6 +649,7 @@ wl_show_host_event(wl_event_msg_t *event, void *event_data)
 			sprintf(err_msg, "AUTH unknown: %d", (int)auth_type);
 			auth_str = err_msg;
 		}
+		(void)auth_str;
 		if (event_type == WLC_E_AUTH_IND) {
 			DHD_EVENT(("MACEVENT: %s, MAC %s, %s\n", event_name, eabuf, auth_str));
 		} else if (status == WLC_E_STATUS_SUCCESS) {
@@ -826,7 +831,9 @@ wl_host_event(struct dhd_info *dhd, int *ifidx, void *pktdata,
 
 	type = ntoh32_ua((void *)&event->event_type);
 	flags = ntoh16_ua((void *)&event->flags);
+	(void)flags;
 	status = ntoh32_ua((void *)&event->status);
+	(void)status;
 	evlen = ntoh32_ua((void *)&event->datalen) + sizeof(bcm_event_t);
 
 	switch (type) {

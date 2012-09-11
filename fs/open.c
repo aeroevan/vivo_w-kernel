@@ -613,6 +613,7 @@ SYSCALL_DEFINE3(fchown, unsigned int, fd, uid_t, user, gid_t, group)
 	if (error)
 		goto out_fput;
 	dentry = file->f_path.dentry;
+	(void)dentry;
 	audit_inode(NULL, dentry);
 	error = chown_common(&file->f_path, user, group);
 	mnt_drop_write(file->f_path.mnt);

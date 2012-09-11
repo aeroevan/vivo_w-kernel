@@ -950,6 +950,7 @@ static int gs_write(struct tty_struct *tty, const unsigned char *buf, int count)
 	/* treat count == 0 as flush_chars() */
 	if (port->port_usb)
 		status = gs_start_tx(port);
+	(void)status;
 	spin_unlock_irqrestore(&port->port_lock, flags);
 
 	return count;

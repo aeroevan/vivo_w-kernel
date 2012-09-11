@@ -581,6 +581,7 @@ void inotify_destroy(struct inotify_handle *ih)
 		}
 		watch = list_first_entry(watches, struct inotify_watch, h_list);
 		sb = watch->inode->i_sb;
+		(void)sb;
 		if (!pin_to_kill(ih, watch))
 			continue;
 
@@ -807,6 +808,7 @@ int inotify_rm_wd(struct inotify_handle *ih, u32 wd)
 		return -EINVAL;
 	}
 	sb = watch->inode->i_sb;
+	(void)sb;
 	if (!pin_to_kill(ih, watch))
 		return 0;
 

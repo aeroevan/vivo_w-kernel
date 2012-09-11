@@ -1017,6 +1017,7 @@ int icmp6_dst_gc(void)
 	int more = 0;
 
 	next = NULL;
+	(void)next;
 
 	spin_lock_bh(&icmp6_dst_lock);
 	pprev = &icmp6_dst_gc_list;

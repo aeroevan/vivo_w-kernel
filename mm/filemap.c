@@ -2246,6 +2246,7 @@ static ssize_t generic_perform_write(struct file *file,
 
 		offset = (pos & (PAGE_CACHE_SIZE - 1));
 		index = pos >> PAGE_CACHE_SHIFT;
+        (void)index;
 		bytes = min_t(unsigned long, PAGE_CACHE_SIZE - offset,
 						iov_iter_count(i));
 

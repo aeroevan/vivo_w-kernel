@@ -875,6 +875,7 @@ u32 vid_enc_get_sequence_header(struct video_client_ctx *client_ctx,
 		ERR("%s(): Get VCD_I_SEQ_HEADER Failed\n",
 				__func__);
 		status = false;
+		(void)status;
 	}
 	return true;
 }

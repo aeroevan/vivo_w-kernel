@@ -143,6 +143,7 @@ u32 vcd_sched_remove_client(struct vcd_sched_clnt_ctx *sched_cctxt)
 		rc = VCD_ERR_ILLEGAL_OP;
 	} else {
 		cctxt = sched_cctxt->clnt_data;
+		(void)cctxt;
 		list_del(&sched_cctxt->list);
 		memset(sched_cctxt, 0,
 			sizeof(struct vcd_sched_clnt_ctx));

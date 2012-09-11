@@ -568,6 +568,7 @@ void msm_gemini_hw_region_dump(int size)
 
 		d = readl(p);
 		p8 = (uint8_t *) &d;
+        (void)p8;
 		while (size) {
 			GMN_DBG("%02X", *p8++);
 			size--;

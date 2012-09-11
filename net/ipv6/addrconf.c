@@ -721,6 +721,7 @@ static void ipv6_del_addr(struct inet6_ifaddr *ifp)
 	unsigned long expires = jiffies;
 
 	hash = ipv6_addr_hash(&ifp->addr);
+	(void)hash;
 
 	spin_lock_bh(&ifp->state_lock);
 	state = ifp->state;

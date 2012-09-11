@@ -222,8 +222,11 @@ si_buscore_setup(si_info_t *sii, chipcregs_t *cc, uint bustype, uint32 savewin,
 	sii->pub.buscoreidx = BADIDX;
 
 	pci = pcie = FALSE;
+	(void)pci;
 	pcirev = pcierev = NOREV;
+	(void)pcirev;
 	pciidx = pcieidx = BADIDX;
+	(void)pciidx;
 
 	for (i = 0; i < sii->numcores; i++) {
 		uint cid, crev;
@@ -400,6 +403,7 @@ si_doattach(si_info_t *sii, uint devid, osl_t *osh, void *regs,
 	}
 
 	pvars = NULL;
+	(void)pvars;
 
 
 
@@ -1304,6 +1308,7 @@ si_watchdog_ms(si_t *sih, uint32 ms)
 	si_info_t *sii;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 
 	si_watchdog(sih, wd_msticks * ms);
 }
@@ -1440,6 +1445,7 @@ si_gpioreserve(si_t *sih, uint32 gpio_bitmask, uint8 priority)
 	si_info_t *sii;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 
 	/* only cores on SI_BUS share GPIO's and only applcation users need to
 	 * reserve/release GPIO
@@ -1475,6 +1481,7 @@ si_gpiorelease(si_t *sih, uint32 gpio_bitmask, uint8 priority)
 	si_info_t *sii;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 
 	/* only cores on SI_BUS share GPIO's and only applcation users need to
 	 * reserve/release GPIO
@@ -1507,6 +1514,7 @@ si_gpioin(si_t *sih)
 	uint regoff;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	regoff = 0;
 
 	regoff = OFFSETOF(chipcregs_t, gpioin);
@@ -1521,6 +1529,7 @@ si_gpiointpolarity(si_t *sih, uint32 mask, uint32 val, uint8 priority)
 	uint regoff;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	regoff = 0;
 
 	/* gpios could be shared on router platforms */
@@ -1542,6 +1551,7 @@ si_gpiointmask(si_t *sih, uint32 mask, uint32 val, uint8 priority)
 	uint regoff;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	regoff = 0;
 
 	/* gpios could be shared on router platforms */
@@ -1562,6 +1572,7 @@ si_gpioled(si_t *sih, uint32 mask, uint32 val)
 	si_info_t *sii;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	if (sih->ccrev < 16)
 		return -1;
 
@@ -1576,6 +1587,7 @@ si_gpiotimerval(si_t *sih, uint32 mask, uint32 gpiotimerval)
 	si_info_t *sii;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 
 	if (sih->ccrev < 16)
 		return -1;
@@ -1591,6 +1603,7 @@ si_gpiopull(si_t *sih, bool updown, uint32 mask, uint32 val)
 	uint offs;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	if (sih->ccrev < 20)
 		return -1;
 
@@ -1605,6 +1618,7 @@ si_gpioevent(si_t *sih, uint regtype, uint32 mask, uint32 val)
 	uint offs;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	if (sih->ccrev < 11)
 		return -1;
 
@@ -1631,6 +1645,7 @@ si_gpio_handler_register(si_t *sih, uint32 event,
 	ASSERT(cb != NULL);
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	if (sih->ccrev < 11)
 		return NULL;
 
@@ -1710,6 +1725,7 @@ si_gpio_int_enable(si_t *sih, bool enable)
 	uint offs;
 
 	sii = SI_INFO(sih);
+	(void)sii;
 	if (sih->ccrev < 11)
 		return -1;
 

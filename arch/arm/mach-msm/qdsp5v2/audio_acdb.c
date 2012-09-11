@@ -299,6 +299,7 @@ s32 acdb_calibrate_device(void *data)
 
 		mutex_unlock(&acdb_data.acdb_mutex);
 	}
+    (void)rc;
 
 done:
 	return 0;

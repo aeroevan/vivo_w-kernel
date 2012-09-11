@@ -67,6 +67,7 @@ static int codec_spi_write(unsigned char addr, unsigned char data)
 	buffer[0] = addr << 1;
 	buffer[1] = data;
 	rc = spi_write(codec_dev, buffer, 2);
+	(void)rc;
 
 	return 1;
 }

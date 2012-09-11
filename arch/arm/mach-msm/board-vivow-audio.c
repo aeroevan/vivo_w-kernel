@@ -217,6 +217,7 @@ void vivow_snddev_usb_headset_on(int en)
 		gpio_set_value(VIVOW_AUDIOz_UART_SW, 1);
 		gpio_set_value(VIVOW_USBz_AUDIO_SW, 0);
 	}
+    (void)ret;
 }
 
 void vivow_snddev_imic_pamp_on(int en)

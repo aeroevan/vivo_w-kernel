@@ -352,6 +352,7 @@ void free_pgd_range(struct mmu_gather *tlb,
 		return;
 
 	start = addr;
+    (void)start;
 	pgd = pgd_offset(tlb->mm, addr);
 	do {
 		next = pgd_addr_end(addr, end);
@@ -742,7 +743,9 @@ again:
 	src_ptl = pte_lockptr(src_mm, src_pmd);
 	spin_lock_nested(src_ptl, SINGLE_DEPTH_NESTING);
 	orig_src_pte = src_pte;
+    (void)orig_src_pte;
 	orig_dst_pte = dst_pte;
+    (void)orig_dst_pte;
 	arch_enter_lazy_mmu_mode();
 
 	do {

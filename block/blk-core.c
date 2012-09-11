@@ -1738,6 +1738,7 @@ static void blk_account_io_completion(struct request *req, unsigned int bytes)
 		int cpu;
 
 		cpu = part_stat_lock();
+		(void)cpu;
 		part = disk_map_sector_rcu(req->rq_disk, blk_rq_pos(req));
 		part_stat_add(cpu, part, sectors[rw], bytes >> 9);
 		part_stat_unlock();

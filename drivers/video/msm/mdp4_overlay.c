@@ -408,6 +408,7 @@ void mdp4_overlay_rgb_setup(struct mdp4_overlay_pipe *pipe)
 	src_size = ((pipe->src_h << 16) | pipe->src_w);
 	src_xy = ((pipe->src_y << 16) | pipe->src_x);
 	dst_size = ((pipe->dst_h << 16) | pipe->dst_w);
+	(void)dst_size;
 
 	format = mdp4_overlay_format(pipe);
 	pattern = mdp4_overlay_unpack_pattern(pipe);

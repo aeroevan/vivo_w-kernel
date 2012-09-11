@@ -599,6 +599,7 @@ int radix_tree_tag_get(struct radix_tree_root *root,
 		 */
 		if (!tag_get(node, tag, offset))
 			saw_unset_tag = 1;
+		(void)saw_unset_tag;
 		if (height == 1)
 			return !!tag_get(node, tag, offset);
 		node = rcu_dereference_raw(node->slots[offset]);

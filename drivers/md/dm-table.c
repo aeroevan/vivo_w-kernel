@@ -1062,13 +1062,13 @@ static void dm_table_set_integrity(struct dm_table *t)
 	if (!prev || !bdev_get_integrity(prev->dm_dev.bdev))
 		goto no_integrity;
 
-	blk_integrity_register(dm_disk(t->md),
+	(void)blk_integrity_register(dm_disk(t->md),
 			       bdev_get_integrity(prev->dm_dev.bdev));
 
 	return;
 
 no_integrity:
-	blk_integrity_register(dm_disk(t->md), NULL);
+	(void)blk_integrity_register(dm_disk(t->md), NULL);
 
 	return;
 }

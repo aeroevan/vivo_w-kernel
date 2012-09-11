@@ -940,6 +940,7 @@ static int tpacket_snd(struct packet_sock *po, struct msghdr *msg)
 	int status = 0;
 
 	sock = po->sk.sk_socket;
+	(void)sock;
 
 	mutex_lock(&po->pg_vec_lock);
 

@@ -367,6 +367,7 @@ int snd_card_disconnect(struct snd_card *card)
 	spin_lock(&card->files_lock);
 	list_for_each_entry(mfile, &card->files_list, list) {
 		file = mfile->file;
+		(void)file;
 
 		/* it's critical part, use endless loop */
 		/* we have no room to fail */

@@ -4156,6 +4156,7 @@ static void cache_reap(struct work_struct *w)
 			freed = drain_freelist(searchp, l3, (l3->free_limit +
 				5 * searchp->num - 1) / (5 * searchp->num));
 			STATS_ADD_REAPED(searchp, freed);
+            (void)freed;
 		}
 next:
 		cond_resched();

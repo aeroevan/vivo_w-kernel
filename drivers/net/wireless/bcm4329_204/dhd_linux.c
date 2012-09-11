@@ -1101,6 +1101,7 @@ dhd_rx_frame(dhd_pub_t *dhdp, int ifidx, void *pktbuf, int numpkt)
 	}
 
 	save_pktbuf = pktbuf;
+	(void)save_pktbuf;
 
 	for (i = 0; pktbuf && i < numpkt; i++, pktbuf = pnext) {
 
@@ -2549,6 +2550,7 @@ dhd_os_wd_timer(void *bus, uint wdtick)
 		del_timer_sync(&dhd->timer);
 		dhd->wd_timer_valid = FALSE;
 		save_dhd_watchdog_ms = wdtick;
+		(void)save_dhd_watchdog_ms;
 		return;
 	}
 

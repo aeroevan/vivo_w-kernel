@@ -136,6 +136,7 @@ static enum hrtimer_restart msm_serial_clock_off(struct hrtimer *timer) {
 		} else {
 			hrtimer_forward_now(timer, msm_port->clk_off_delay);
 			ret = HRTIMER_RESTART;
+			(void)ret;
 		}
 	}
 

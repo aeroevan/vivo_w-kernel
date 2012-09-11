@@ -520,6 +520,7 @@ static void microp_intr_work_func(struct work_struct *work)
 
 	cdata = i2c_get_clientdata(client);
 	pdata = client->dev.platform_data;
+    (void)pdata;
 
 	memset(data, 0x00, sizeof(data));
 	if (i2c_read_block(client, MICROP_I2C_RCMD_GPI_INT_STATUS,
@@ -573,6 +574,7 @@ static void microp_early_suspend(struct early_suspend *h)
 	pdata = client->dev.platform_data;
 
 	atomic_set(&cdata->microp_is_suspend, 1);
+    (void)pdata;
 }
 
 static void microp_late_resume(struct early_suspend *h)
@@ -589,6 +591,7 @@ static void microp_late_resume(struct early_suspend *h)
 	pdata = client->dev.platform_data;
 
 	atomic_set(&cdata->microp_is_suspend, 0);
+    (void)pdata;
 }
 #endif
 

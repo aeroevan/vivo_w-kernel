@@ -314,13 +314,14 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 	int ret = 1, disable_multi = 0, card_no_ready = 0;
 	int err = 0;
 	int try_recovery = 1, do_reinit = 0, do_remove = 0;
+	int retries = 3;
 
 #ifdef CONFIG_MMC_PERF_PROFILING
 	ktime_t start,diff;
+	start.tv64 = 0;
 #endif
 
 #ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
-	int retries = 3;
 	if (mmc_bus_needs_resume(card->host)) {
 		err = mmc_resume_bus(card->host);
 		if (err) {

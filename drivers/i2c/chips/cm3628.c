@@ -895,6 +895,7 @@ void psensor_set_kvalue(struct cm3628_info *lpi)
 	/*only use ps_kparam2 for cm3628*/
 	if (ps_kparam1 >> 16 == PS_CALIBRATED) {
 		iteration = (uint8_t)((ps_kparam2>>8) & 0xFF);
+		(void)iteration;
 		lpi->inte_cancel_set = (uint8_t)(ps_kparam2 & 0xFF);
 		D("[CM3628] %s: PS calibrated inte_cancel_set = 0x%x\n",
 				__func__, lpi->inte_cancel_set);
@@ -1179,6 +1180,7 @@ static ssize_t ps_kadc_store(struct device *dev,
 	D("%s: store value = 0x%X, 0x%X\n",
 		__func__, param1, param2);
 	value = (param2>>8) & 0xFF;
+	(void)value;
 	if (lpi->ps_calibration_rule == 1) {/*for saga*/
 		lpi->ps_thd_set = lpi->ps_thd_with_cal;
 		D("[CM3628] %s: Proximity change threshold %d, after calibration\n",

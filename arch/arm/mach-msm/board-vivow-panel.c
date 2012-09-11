@@ -1049,6 +1049,7 @@ mddi_power(struct msm_mddi_client_data *client_data, int on)
 		rc = msm_proc_comm(PCOM_RPC_GPIO_TLMM_CONFIG_EX, &config, 0);
 		config = PCOM_GPIO_CFG(VIVOW_LCD_ID0, 0, GPIO_INPUT, GPIO_PULL_DOWN, GPIO_2MA);
 		rc = msm_proc_comm(PCOM_RPC_GPIO_TLMM_CONFIG_EX, &config, 0);
+        (void)rc;
 	}
 }
 

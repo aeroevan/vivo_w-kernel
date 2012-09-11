@@ -425,6 +425,7 @@ int msm_rpcrouter_init_devices(void)
 	}
 
 	major = MAJOR(msm_rpcrouter_devno);
+    (void)major;
 	rpcrouter_device = device_create(msm_rpcrouter_class, NULL,
 					 msm_rpcrouter_devno, NULL, "%.8x:%d",
 					 0, 0);

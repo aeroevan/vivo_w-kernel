@@ -1699,6 +1699,7 @@ int snd_soc_init_card(struct snd_soc_device *socdev)
 		}
 		if (card->dai_link[i].codec_dai->ac97_control) {
 			ac97 = 1;
+			(void)ac97;
 			snd_ac97_dev_add_pdata(codec->ac97,
 				card->dai_link[i].cpu_dai->ac97_pdata);
 		}

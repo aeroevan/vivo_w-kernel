@@ -977,6 +977,7 @@ int ext3_group_extend(struct super_block *sb, struct ext3_super_block *es,
 	 * taking the s_resize_lock below. */
 	o_blocks_count = le32_to_cpu(es->s_blocks_count);
 	o_groups_count = EXT3_SB(sb)->s_groups_count;
+    (void)o_groups_count;
 
 	if (test_opt(sb, DEBUG))
 		printk(KERN_DEBUG "EXT3-fs: extending last group from "E3FSBLK" uto "E3FSBLK" blocks\n",

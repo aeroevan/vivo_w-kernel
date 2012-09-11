@@ -132,9 +132,10 @@ extern int qspi_send_9bit(struct spi_msg *msg);
 
 static int lcm_write_cmd(struct spi_msg cmd)
 {
-        int ret = -1;
+	int ret = -1;
 	ret = qspi_send_9bit(&cmd);
-        return 0;
+	(void)ret;
+	return 0;
 }
 
 static int lcm_write_seq(struct spi_msg cmd_table[], unsigned size)

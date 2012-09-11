@@ -1532,6 +1532,7 @@ static int unix_stream_sendmsg(struct kiocb *kiocb, struct socket *sock,
 		goto out_err;
 	} else {
 		sunaddr = NULL;
+		(void)sunaddr;
 		err = -ENOTCONN;
 		other = unix_peer(sk);
 		if (!other)

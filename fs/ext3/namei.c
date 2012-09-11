@@ -1488,6 +1488,7 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 	de = (struct ext3_dir_entry_2 *) bh->b_data;
 	de->inode = 0;
 	de->rec_len = ext3_rec_len_to_disk(blocksize);
+    (void)offset;
 	return add_dirent_to_buf(handle, dentry, inode, de, bh);
 }
 

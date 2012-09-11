@@ -171,6 +171,8 @@ int walk_page_range(unsigned long addr, unsigned long end,
 			pgd = pgd_offset(walk->mm, next);
 			continue;
 		}
+#else
+		(void)vma;
 #endif
 		if (pgd_none_or_clear_bad(pgd)) {
 			if (walk->pte_hole)

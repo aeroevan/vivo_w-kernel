@@ -1107,6 +1107,7 @@ ktime_t hrtimer_get_remaining(const struct hrtimer *timer)
 	ktime_t rem;
 
 	base = lock_hrtimer_base(timer, &flags);
+    (void)base;
 	rem = hrtimer_expires_remaining(timer);
 	unlock_hrtimer_base(timer, &flags);
 

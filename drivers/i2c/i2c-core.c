@@ -795,6 +795,7 @@ static int i2c_register_adapter(struct i2c_adapter *adap)
 	mutex_lock(&core_lock);
 	dummy = bus_for_each_drv(&i2c_bus_type, NULL, adap,
 				 __process_new_adapter);
+	(void)dummy;
 	mutex_unlock(&core_lock);
 
 	return 0;

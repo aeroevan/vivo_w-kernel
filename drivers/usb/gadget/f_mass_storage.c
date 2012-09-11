@@ -1160,6 +1160,7 @@ static void invalidate_sub(struct lun *curlun)
 	unsigned long	rc;
 
 	rc = invalidate_mapping_pages(inode->i_mapping, 0, -1);
+	(void)rc;
 	VLDBG(curlun, "invalidate_inode_pages -> %ld\n", rc);
 }
 
@@ -1462,7 +1463,9 @@ static int do_mode_sense(struct fsg_dev *fsg, struct fsg_buffhd *bh)
 		return -EINVAL;
 	}
 	changeable_values = (pc == 1);
+	(void)changeable_values;
 	all_pages = (page_code == 0x3f);
+	(void)all_pages;
 
 	/* Write the mode parameter header.  Fixed values are: default
 	 * medium type, no cache control (DPOFUA), and no block descriptors.
@@ -1534,6 +1537,7 @@ static int do_start_stop(struct fsg_dev *fsg)
 	/* int immed = fsg->cmnd[1] & 0x01; */
 	loej = fsg->cmnd[4] & 0x02;
 	start = fsg->cmnd[4] & 0x01;
+	(void)start;
 
 	if (loej) {
 		/* eject request from the host */
@@ -2542,6 +2546,7 @@ static void handle_exception(struct fsg_dev *fsg)
 
 	case FSG_STATE_CONFIG_CHANGE:
 		rc = do_set_config(fsg, new_config);
+		(void)rc;
 		if (new_config == 0) {
 			/* We're using the backing file */
 			down_read(&fsg->filesem);

@@ -2177,6 +2177,7 @@ u32 vcd_handle_first_fill_output_buffer_for_dec(
 	dpb.dec_pic_buffers = dpb_list;
 	dpb.no_of_dec_pic_buf = out_buf_pool->count;
 	rc = ddl_set_property(cctxt->ddl_handle, &prop_hdr, &dpb);
+	(void)rc;
 
 	kfree(dpb_list);
 	*handled = false;
@@ -2712,6 +2713,7 @@ u32 vcd_calculate_frame_delta(
 	temp = temp * cctxt->time_resoln;
 	temp = (temp + (VCD_TIMESTAMP_RESOLUTION >> 1));
 	temp1 = do_div(temp, VCD_TIMESTAMP_RESOLUTION);
+	(void)temp1;
 	frm_delta = temp;
 	VCD_MSG_LOW("temp1=%lld  temp=%lld", temp1, temp);
 	cctxt->status.time_elapsed += frm_delta;

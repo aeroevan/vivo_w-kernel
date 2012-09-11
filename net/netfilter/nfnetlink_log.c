@@ -419,6 +419,7 @@ __build_packet_message(struct nfulnl_instance *inst,
 
 	if (outdev) {
 		tmp_uint = htonl(outdev->ifindex);
+		(void)tmp_uint;
 #ifndef CONFIG_BRIDGE_NETFILTER
 		NLA_PUT_BE32(inst->skb, NFULA_IFINDEX_OUTDEV,
 			     htonl(outdev->ifindex));

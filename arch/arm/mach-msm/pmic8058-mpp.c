@@ -130,6 +130,7 @@ int pm8058_mpp_config(unsigned mpp, unsigned type, unsigned level,
 		return -EINVAL;
 
 	pm_chip = dev_get_drvdata(pm8058_mpp_chip.chip.dev);
+    (void)pm_chip;
 
 	config = (type << PM8058_MPP_TYPE_SHIFT) & PM8058_MPP_TYPE_MASK;
 	config |= (level << PM8058_MPP_CONFIG_LVL_SHIFT) &

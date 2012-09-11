@@ -165,6 +165,7 @@ ai_scan(si_t *sih, void *regs, uint devid)
 			return;
 		}
 		base = eromptr - sizeof(uint32);
+		(void)base;
 		cib = get_erom_ent(sih, &eromptr, 0, 0);
 
 		if ((cib & ER_TAG) != ER_CI) {
@@ -175,6 +176,7 @@ ai_scan(si_t *sih, void *regs, uint devid)
 		cid = (cia & CIA_CID_MASK) >> CIA_CID_SHIFT;
 		mfg = (cia & CIA_MFG_MASK) >> CIA_MFG_SHIFT;
 		crev = (cib & CIB_REV_MASK) >> CIB_REV_SHIFT;
+		(void)crev;
 		nmw = (cib & CIB_NMW_MASK) >> CIB_NMW_SHIFT;
 		nsw = (cib & CIB_NSW_MASK) >> CIB_NSW_SHIFT;
 		nmp = (cib & CIB_NMP_MASK) >> CIB_NMP_SHIFT;
@@ -587,6 +589,7 @@ ai_core_disable(si_t *sih, uint32 bits)
 
 	W_REG(sii->osh, &ai->ioctrl, bits);
 	dummy = R_REG(sii->osh, &ai->ioctrl);
+	(void)dummy;
 	OSL_DELAY(10);
 
 	W_REG(sii->osh, &ai->resetctrl, AIRC_RESET);
@@ -619,6 +622,7 @@ ai_core_reset(si_t *sih, uint32 bits, uint32 resetbits)
 	 */
 	W_REG(sii->osh, &ai->ioctrl, (bits | SICF_FGC | SICF_CLOCK_EN));
 	dummy = R_REG(sii->osh, &ai->ioctrl);
+	(void)dummy;
 	W_REG(sii->osh, &ai->resetctrl, 0);
 	OSL_DELAY(1);
 

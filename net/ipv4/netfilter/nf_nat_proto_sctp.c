@@ -48,7 +48,9 @@ sctp_manip_pkt(struct sk_buff *skb,
 	if (maniptype == IP_NAT_MANIP_SRC) {
 		/* Get rid of src ip and src pt */
 		oldip = iph->saddr;
+		(void)oldip;
 		newip = tuple->src.u3.ip;
+		(void)newip;
 		hdr->source = tuple->src.u.sctp.port;
 	} else {
 		/* Get rid of dst ip and dst pt */

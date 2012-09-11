@@ -128,6 +128,7 @@ static int vpe_reset(void)
 
 	vpe_reset_state_variables();
 	vpe_version = msm_io_r(vpe_device->vpebase + VPE_HW_VERSION_OFFSET);
+	(void)vpe_version;
 	CDBG("vpe_version = 0x%x\n", vpe_version);
 
 	/* disable all interrupts.*/
@@ -404,6 +405,7 @@ static int vpe_update_scaler(struct video_crop_t *pcrop)
 		xscale_filter_sel = 2;
 	else
 		xscale_filter_sel = 3;
+	(void)xscale_filter_sel;
 
 	if (phase_step_y > HAL_MDP_PHASE_STEP_2P50)
 		yscale_filter_sel = 0;
@@ -413,6 +415,7 @@ static int vpe_update_scaler(struct video_crop_t *pcrop)
 		yscale_filter_sel = 2;
 	else
 		yscale_filter_sel = 3;
+	(void)yscale_filter_sel;
 
 	/* calculate phase init for the x direction */
 
@@ -645,6 +648,7 @@ static int vpe_update_scaler_with_dis(struct video_crop_t *pcrop,
 		xscale_filter_sel = 2;
 	else
 		xscale_filter_sel = 3;
+	(void)xscale_filter_sel;
 
 	if (phase_step_y > HAL_MDP_PHASE_STEP_2P50)
 		yscale_filter_sel = 0;
@@ -654,6 +658,7 @@ static int vpe_update_scaler_with_dis(struct video_crop_t *pcrop,
 		yscale_filter_sel = 2;
 	else
 		yscale_filter_sel = 3;
+	(void)yscale_filter_sel;
 
 	/* calculate phase init for the x direction */
 

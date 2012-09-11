@@ -653,6 +653,7 @@ dev_iw_iovar_getbuf(
 	int iolen;
 
 	iolen = bcm_mkiovar(iovar, param, paramlen, bufptr, buflen);
+	(void)iolen;
 	ASSERT(iolen);
 
 	return (dev_wlc_ioctl(dev, WLC_GET_VAR, bufptr, buflen));
@@ -689,6 +690,7 @@ dev_wlc_bufvar_get(
 	uint len;
 
 	len = bcm_mkiovar(name, NULL, 0, ioctlbuf, sizeof(ioctlbuf));
+	(void)len;
 	ASSERT(len);
 	error = dev_wlc_ioctl(dev, WLC_GET_VAR, (void *)ioctlbuf, MAX_WLIW_IOCTL_LEN);
 	if (!error)
@@ -2040,6 +2042,7 @@ static int iwpriv_set_ap_config(struct net_device *dev,
 		memset(ap_cfg, 0, sizeof(struct ap_profile));
 
 		str_ptr = extra;
+		(void)str_ptr;
 
 		init_ap_profile_from_string(extra, ap_cfg);
 
@@ -5627,6 +5630,7 @@ wl_iw_set_pmksa(
 			uint j;
 			uint k;
 			k = pmkid_list.pmkids.npmkid;
+			(void)k;
 			WL_WSEC(("wl_iw_set_pmksa,IW_PMKSA_ADD - PMKID: %s = ",
 				bcm_ether_ntoa(&pmkid_list.pmkids.pmkid[k].BSSID,
 				eabuf)));

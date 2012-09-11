@@ -839,6 +839,8 @@ mismatch:
 			printk(KERN_ERR "current handler: %s\n", old_name);
 		dump_stack();
 	}
+#else
+    (void)old_name;
 #endif
 	ret = -EBUSY;
 

@@ -748,6 +748,7 @@ static int __init rmnet_init(void)
 			return -ENOMEM;
 
 		d = &(dev->dev);
+		(void)d;
 		p = netdev_priv(dev);
 		p->chname = ch_name[n];
 		/* Initial config uses Ethernet */

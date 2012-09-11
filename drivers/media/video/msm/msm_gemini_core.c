@@ -126,6 +126,7 @@ int msm_gemini_core_we_buf_update(struct msm_gemini_core_buf *buf)
 		(int) buf->y_buffer_addr, (int) buf->cbcr_buffer_addr,
 		buf->y_len);
 	rc = msm_gemini_hw_pingpong_update(&we_pingpong_buf, buf);
+	(void)rc;
 	return 0;
 }
 

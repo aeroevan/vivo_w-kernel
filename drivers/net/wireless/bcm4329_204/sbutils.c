@@ -122,6 +122,7 @@ sb_write_sbreg(si_info_t *sii, volatile uint32 *sbr, uint32 v)
 		dummy = R_REG(sii->osh, sbr);
 		W_REG(sii->osh, ((volatile uint16 *)sbr + 1), (uint16)((v >> 16) & 0xffff));
 #endif	/* IL_BIGENDIAN */
+		(void)dummy;
 	} else
 		W_REG(sii->osh, sbr, v);
 
@@ -782,6 +783,7 @@ sb_core_disable(si_t *sih, uint32 bits)
 	/* set target reject and spin until busy is clear (preserve core-specific bits) */
 	OR_SBREG(sii, &sb->sbtmstatelow, SBTML_REJ);
 	dummy = R_SBREG(sii, &sb->sbtmstatelow);
+	(void)dummy;
 	OSL_DELAY(1);
 	SPINWAIT((R_SBREG(sii, &sb->sbtmstatehigh) & SBTMH_BUSY), 100000);
 	if (R_SBREG(sii, &sb->sbtmstatehigh) & SBTMH_BUSY)

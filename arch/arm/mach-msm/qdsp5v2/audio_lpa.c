@@ -580,6 +580,7 @@ static void audlpa_async_send_data(struct audio *audio, unsigned needed,
 		if (!list_empty(&audio->out_queue))
 			audlpa_async_send_buffer(audio);
 	}
+    (void)temp;
 done:
 	spin_unlock_irqrestore(&audio->dsp_lock, flags);
 }

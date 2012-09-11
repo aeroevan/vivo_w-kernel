@@ -289,6 +289,7 @@ int journal_skip_recovery(journal_t *journal)
 
 	memset (&info, 0, sizeof(info));
 	sb = journal->j_superblock;
+	(void)sb;
 
 	err = do_one_pass(journal, &info, PASS_SCAN);
 
@@ -325,6 +326,7 @@ static int do_one_pass(journal_t *journal,
 	int			MAX_BLOCKS_PER_DESC;
 	MAX_BLOCKS_PER_DESC = ((journal->j_blocksize-sizeof(journal_header_t))
 			       / sizeof(journal_block_tag_t));
+	(void)MAX_BLOCKS_PER_DESC;
 
 	/*
 	 * First thing is to establish what we expect to find in the log

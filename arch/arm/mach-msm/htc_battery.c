@@ -459,6 +459,7 @@ static int htc_battery_status_update(u32 curr_level)
 			BATT_LOG("power_supply_changed: battery");
 	}
 #else
+    (void)notify;
 	/* we don't check level here for charging over temp RPC call */
 		power_supply_changed(&htc_power_supplies[BATTERY_SUPPLY]);
 	if (htc_batt_debug_mask & HTC_BATT_DEBUG_UEVT)

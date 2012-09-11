@@ -247,6 +247,7 @@ cabc_bl_handle(struct platform_device *pdev, int brightness)
                         brightness == LED_FULL ? "on" : "off");
 
         lcd_cdev = &cabc->lcd_backlight;
+		(void)lcd_cdev;
         wake_lock(&cabc->wakelock);
 
         if (brightness != LED_FULL) {

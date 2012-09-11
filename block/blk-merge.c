@@ -25,6 +25,7 @@ static unsigned int __blk_recalc_rq_segments(struct request_queue *q,
 	cluster = test_bit(QUEUE_FLAG_CLUSTER, &q->queue_flags);
 	seg_size = 0;
 	phys_size = nr_phys_segs = 0;
+	(void)phys_size;
 	for_each_bio(bio) {
 		bio_for_each_segment(bv, bio, i) {
 			/*

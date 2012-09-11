@@ -316,6 +316,7 @@ static irqreturn_t mddi_isr(int irq, void *data)
 
 	active = mddi_readl(INT);
 	status = mddi_readl(STAT);
+	(void)status;
 
 	mddi_writel(active, INT);
 
@@ -727,6 +728,7 @@ uint32_t mddi_remote_read(struct msm_mddi_client_data *cdata, uint32_t reg)
 	ll->reserved = 0;
 
 	s = mddi_readl(STAT);
+	(void)s;
 	/* printk(KERN_INFO "mddi_remote_read(%x), stat = %x\n", reg, s); */
 
 	ri.reg = reg;
@@ -910,9 +912,11 @@ static ssize_t mddi_reg_write(struct file *file, const char __user *user_buf,
 
 		len = snprintf(mddi->debugfs_buf, sizeof(mddi->debugfs_buf),
 			 "[W] reg=0x%x val=0x%x\n", reg, data);
+		(void)len;
 		printk(KERN_INFO "%s: reg=%x val=%x\n", __func__, reg, data);
 	} else {
 		cnt = sscanf(debug_buf, "%c %x", &type ,&reg);
+		(void)cnt;
 
 		len = snprintf(mddi->debugfs_buf, sizeof(mddi->debugfs_buf),
 			 "[R] reg=0x%x val=0x%x\n", reg,

@@ -1587,6 +1587,7 @@ void kmsg_dump(enum kmsg_dump_reason reason)
 	spin_lock_irqsave(&logbuf_lock, flags);
 	end = log_end & LOG_BUF_MASK;
 	chars = logged_chars;
+    (void)chars;
 	spin_unlock_irqrestore(&logbuf_lock, flags);
 
 	if (logged_chars > end) {

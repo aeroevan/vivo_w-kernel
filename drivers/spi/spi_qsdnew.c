@@ -1635,6 +1635,7 @@ static int msm_spi_resume(struct platform_device *pdev)
 	dd->suspended = 0;
 	if (pdata && pdata->gpio_config)
 		rc = pdata->gpio_config();
+	(void)rc;
 resume_exit:
 	return 0;
 }

@@ -289,6 +289,7 @@ static void mdp_do_dma_timer(unsigned long data)
 	int i;
 	spin_lock_irqsave(&mdp->lock, irq_flags);
 	status = mdp_readl(mdp, MDP_INTR_STATUS);
+	(void)status;
 	mdp_writel(mdp, mdp_irq_mask, MDP_INTR_CLEAR);
 
 	for (i = 0; i < MSM_MDP_NUM_INTERFACES; ++i) {

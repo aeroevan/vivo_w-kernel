@@ -1574,6 +1574,7 @@ static int msm_stats_axi_cfg(struct msm_sync *sync,
 		break;
 	case CMD_GENERAL:
 		data = NULL;
+		(void)data;
 		break;
 	default:
 		pr_err("%s: unknown command type %d\n",

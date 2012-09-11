@@ -1287,6 +1287,7 @@ int journal_check_available_features (journal_t *journal, unsigned long compat,
 		return 1;
 
 	sb = journal->j_superblock;
+	(void)sb;
 
 	/* We can support any known requested features iff the
 	 * superblock is in version 2.  Otherwise we fail to support any
@@ -1491,6 +1492,7 @@ int journal_wipe(journal_t *journal, int write)
 		return err;
 
 	sb = journal->j_superblock;
+	(void)sb;
 
 	if (!journal->j_tail)
 		goto no_recovery;

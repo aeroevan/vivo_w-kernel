@@ -455,6 +455,7 @@ static void voice_auddev_cb_function(u32 evt_id,
 	default:
 		MM_ERR("%s: unknown event %d\n", __func__, evt_id);
 	}
+    (void)rc;
 	return;
 }
 EXPORT_SYMBOL(voice_auddev_cb_function);
@@ -803,6 +804,7 @@ static int voice_thread(void *data)
 		v->dev_event = 0;
 		mutex_unlock(&voice.lock);
 	}
+    (void)rc;
 	return 0;
 }
 

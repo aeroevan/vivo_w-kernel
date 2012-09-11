@@ -1681,6 +1681,7 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
 	/* Check to ensure the stack will not grow into a hugetlb-only region */
 	new_start = (vma->vm_flags & VM_GROWSUP) ? vma->vm_start :
 			vma->vm_end - size;
+	(void)new_start;
 	if (is_hugepage_only_range(vma->vm_mm, new_start, size))
 		return -EFAULT;
 
@@ -2649,5 +2650,6 @@ void __init mmap_init(void)
 	int ret;
 
 	ret = percpu_counter_init(&vm_committed_as, 0);
+	(void)ret;
 	VM_BUG_ON(ret);
 }

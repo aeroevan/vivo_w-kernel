@@ -437,6 +437,7 @@ void audpp_disable(int id, void *private)
 		audpp->mod = NULL;
 		allow_suspend();
 	}
+    (void)rc;
 out:
 	mutex_unlock(audpp->lock);
 }

@@ -1347,6 +1347,7 @@ static void add_usage_links(struct module *mod)
 					   &mod->mkobj.kobj, mod->name);
 	}
 	mutex_unlock(&module_mutex);
+    (void)nowarn;
 #endif
 }
 

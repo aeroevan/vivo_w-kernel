@@ -622,6 +622,7 @@ ssize_t default_file_splice_read(struct file *in, loff_t *ppos,
 	}
 
 	index = *ppos >> PAGE_CACHE_SHIFT;
+	(void)index;
 	offset = *ppos & ~PAGE_CACHE_MASK;
 	nr_pages = (len + offset + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
 

@@ -513,6 +513,7 @@ static int msm_pcm_capture_close(struct snd_pcm_substream *substream)
 	MM_DBG("\n");
 	ret = msm_snddev_withdraw_freq(prtd->session_id,
 			SNDDEV_CAP_TX, AUDDEV_CLNT_ENC);
+	(void)ret;
 	MM_DBG("msm_snddev_withdraw_freq\n");
 	auddev_unregister_evt_listner(AUDDEV_CLNT_ENC, prtd->session_id);
 	prtd->abort = 0;

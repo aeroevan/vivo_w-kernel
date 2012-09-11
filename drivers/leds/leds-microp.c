@@ -111,7 +111,7 @@ static void microp_led_jogball_brightness_set(struct led_classdev *led_cdev,
 	ldata->brightness = brightness;
 	spin_unlock_irqrestore(&ldata->brightness_lock, flags);
 
-	switch (brightness) {
+	switch ((int)brightness) {
 	case 0:
 		data[0] = 0;
 		break;
@@ -157,7 +157,7 @@ static void microp_led_wimax_brightness_set(struct led_classdev *led_cdev,
 	ldata->brightness = brightness;
 	spin_unlock_irqrestore(&ldata->brightness_lock, flags);
 
-	switch (brightness) {
+	switch ((int)brightness) {
 	case 0:
 		data[0] = 0;
 		break;
@@ -225,6 +225,7 @@ static void microp_led_pwm_brightness_set(struct led_classdev *led_cdev,
 	spin_unlock_irqrestore(&ldata->brightness_lock, flags);
 
 	value = brightness >= 255 ? 0x20 : 0;
+	(void)value;
 
 	data[0] = ldata->led_config->fade_time;
 	if (brightness)
@@ -408,6 +409,7 @@ static ssize_t microp_jogball_color_store(struct device *dev,
 
 	led_cdev = (struct led_classdev *)dev_get_drvdata(dev);
 	ldata = container_of(led_cdev, struct microp_led_data, ldev);
+	(void)ldata;
 	client = to_i2c_client(dev->parent);
 
 	dev_dbg(&client->dev, "Setting %s color to R=%d, G=%d, B=%d\n",
@@ -511,6 +513,7 @@ pr_info("%s\n", __func__);
 
 	if (val) {
 		ret = microp_i2c_read(MICROP_I2C_RCMD_LED_STATUS, leds_data, 7);
+		(void)ret;
 		data[0] = 0x03;
 		data[1] = 0x00;
 		data[2] = 0x00;
@@ -543,6 +546,7 @@ pr_info("%s\n", __func__);
 
 	data[0] = 0x00;
 	data[1] = 0x01;
+	(void)data;
 
 
 	return count;

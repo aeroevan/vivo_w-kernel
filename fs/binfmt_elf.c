@@ -824,6 +824,7 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
 				             ELF_PAGESTART(load_bias + vaddr);
 				load_addr += load_bias;
 				reloc_func_desc = load_bias;
+                (void)reloc_func_desc;
 			}
 		}
 		k = elf_ppnt->p_vaddr;

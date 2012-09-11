@@ -1629,6 +1629,7 @@ int tc_classify(struct sk_buff *skb, struct tcf_proto *tp,
 reclassify:
 #endif
 	protocol = skb->protocol;
+	(void)protocol;
 
 	err = tc_classify_compat(skb, tp, res);
 #ifdef CONFIG_NET_CLS_ACT

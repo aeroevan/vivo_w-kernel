@@ -288,6 +288,7 @@ int ip6_nd_hdr(struct sock *sk, struct sk_buff *skb, struct net_device *dev,
 	skb->dev = dev;
 
 	totlen = len + sizeof(struct ipv6hdr);
+	(void)totlen;
 
 	skb_reset_network_header(skb);
 	skb_put(skb, sizeof(struct ipv6hdr));

@@ -402,6 +402,7 @@ static void vfe_send_outmsg(uint8_t msgid, uint32_t pyaddr,
 		outid = 0xff;  /* -1 for error condition.*/
 		break;
 	}
+	(void)outid;
 	msg._u.msgOut.output_id   = msgid;
 	msg._u.msgOut.yBuffer     = pyaddr;
 	msg._u.msgOut.cbcrBuffer  = pcbcraddr;
@@ -477,6 +478,7 @@ static void vfe31_release(struct platform_device *pdev)
 
 	vfemem = vfe31_ctrl->vfemem;
 	vfeio  = vfe31_ctrl->vfeio;
+	(void)vfeio;
 
 	msm_vpe_release();
 
@@ -727,6 +729,7 @@ static void vfe31_reset(void)
 	uint32_t vfe_version;
 	vfe31_reset_internal_variables();
 	vfe_version = msm_io_r(vfe31_ctrl->vfebase);
+	(void)vfe_version;
 	CDBG("vfe_version = 0x%x\n", vfe_version);
 	/* disable all interrupts.  vfeImaskLocal is also reset to 0
 	* to begin with. */
@@ -924,6 +927,7 @@ static int vfe31_capture(uint32_t num_frames_capture)
 				24 * (vfe31_ctrl->outpath.out0.ch1));
 			temp = msm_io_r(vfe31_ctrl->vfebase + V31_AXI_OUT_OFF +
 				 20 + 24 * (vfe31_ctrl->outpath.out0.ch1));
+			(void)temp;
 		}
 		if (vfe31_ctrl->outpath.output_mode & VFE31_OUTPUT_MODE_S) {
 			msm_io_w(1, vfe31_ctrl->vfebase + V31_AXI_OUT_OFF + 20 +
@@ -988,6 +992,7 @@ static int vfe31_start(void)
 			24 * (vfe31_ctrl->outpath.out0.ch1));
 		temp = msm_io_r(vfe31_ctrl->vfebase + V31_AXI_OUT_OFF + 20 +
 			24 * (vfe31_ctrl->outpath.out0.ch1));
+		(void)temp;
 	}
 
 	vfe31_start_common();
@@ -1837,6 +1842,7 @@ static void vfe31_process_reg_update_irq(void)
 				24 * (vfe31_ctrl->outpath.out2.ch1));
 			temp = msm_io_r(vfe31_ctrl->vfebase + V31_AXI_OUT_OFF +
 				20 + 24 * (vfe31_ctrl->outpath.out2.ch1));
+			(void)temp;
 			/* Mask with 0x7 to extract the pixel pattern*/
 			switch (msm_io_r(vfe31_ctrl->vfebase + VFE_CFG_OFF)
 				& 0x7) {
@@ -2081,6 +2087,7 @@ static void vfe31_process_camif_sof_irq(void)
 				vfe31_ctrl->vfebase + VFE_CAMIF_COMMAND);
 			temp = msm_io_r_mb(vfe31_ctrl->vfebase +
 				VFE_CAMIF_COMMAND);
+			(void)temp;
 		}
 	} /* if raw snapshot mode. */
 	vfe31_send_msg_no_payload(MSG_ID_SOF_ACK);
@@ -2277,9 +2284,11 @@ static void vfe31_process_output_path_irq_1(void)
 			/* Y channel */
 			pyaddr = vfe31_get_ch_addr(ping_pong,
 				vfe31_ctrl->outpath.out1.ch0);
+			(void)pyaddr;
 			/* Chroma channel */
 			pcbcraddr = vfe31_get_ch_addr(ping_pong,
 				vfe31_ctrl->outpath.out1.ch1);
+			(void)pcbcraddr;
 
 			CDBG("snapshot main, pyaddr = 0x%x, pcbcraddr = 0x%x\n",
 				pyaddr, pcbcraddr);

@@ -294,6 +294,7 @@ static void btlinux_start_tx(struct uart_port *port /*, unsigned int tty_start*/
 	struct uart_btlinux_port *up = (struct uart_btlinux_port *)port;
 	int count;
 	count = uart_circ_chars_pending(xmit);
+	(void)count;
 
 	/*    dbg("line %d - buf size = %d", port->line, uart_circ_chars_pending(xmit));*/
 	/*    printk("btlinux_start_tx: line %d port %x\n", port->line, up);*/
@@ -1454,6 +1455,7 @@ unsigned int btport_poll(struct file *file, struct poll_table_struct *p_pt)
 	if (!btlinux_port->port.state)
 	    return mask;
 	xmit = &btlinux_port->port.state->xmit;
+	(void)xmit;
 
 	if (btlinux_port->minor == 0) {
 		if (btlinux_port->tx_data_head == btlinux_port->tx_data_tail)

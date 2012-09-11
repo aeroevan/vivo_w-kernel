@@ -45,6 +45,7 @@ static int xfrm6_beet_output(struct xfrm_state *x, struct sk_buff *skb)
 	int optlen, hdr_len;
 
 	iphv4 = ip_hdr(skb);
+	(void)iphv4;
 	hdr_len = 0;
 	optlen = XFRM_MODE_SKB_CB(skb)->optlen;
 	if (unlikely(optlen))

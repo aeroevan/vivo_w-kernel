@@ -502,6 +502,7 @@ dhdsdio_htclk(dhd_bus_t *bus, bool on, bool pendok)
 		    ((bus->sih->buscoretype == PCMCIA_CORE_ID) && (bus->sih->buscorerev == 9))) {
 			uint32 dummy, retries;
 			R_SDREG(dummy, &bus->regs->clockctlstatus, retries);
+			(void)dummy;
 		}
 
 		/* Check current status */
@@ -5534,6 +5535,7 @@ _dhdsdio_download_firmware(struct dhd_bus *bus)
 #else
 		return bcmerror;
 #endif
+		(void)embed;
 	}
 
 	/* Keep arm in reset */

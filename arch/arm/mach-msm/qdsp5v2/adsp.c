@@ -390,6 +390,7 @@ int __msm_adsp_write(struct msm_adsp_module *module, unsigned dsp_queue_addr,
 			while (--cmd_size)
 				*dsp_addr32++ = *buf_ptr++;
 		}
+        (void)cmd_id;
 
 		/* Set the mutex bits */
 		ctrl_word &= ~(ADSP_RTOS_WRITE_CTRL_WORD_MUTEX_M);

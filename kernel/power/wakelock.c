@@ -136,6 +136,7 @@ static int wakelock_stats_show(struct seq_file *m, void *unused)
 			ret = print_lock_stat(m, lock);
 	}
 	spin_unlock_irqrestore(&list_lock, irqflags);
+    (void)ret;
 	return 0;
 }
 

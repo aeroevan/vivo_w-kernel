@@ -7886,6 +7886,7 @@ int alloc_fair_sched_group(struct task_group *tg, struct task_group *parent)
 
 		init_tg_cfs_entry(tg, cfs_rq, se, i, 0, parent->se[i]);
 	}
+    (void)rq;
 
 	return 1;
 
@@ -7976,6 +7977,7 @@ int alloc_rt_sched_group(struct task_group *tg, struct task_group *parent)
 
 		init_tg_rt_entry(tg, rt_rq, rt_se, i, 0, parent->rt_se[i]);
 	}
+    (void)rq;
 
 	return 1;
 

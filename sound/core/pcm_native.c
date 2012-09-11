@@ -1523,6 +1523,7 @@ static int snd_pcm_drop(struct snd_pcm_substream *substream)
 		return -ENXIO;
 	runtime = substream->runtime;
 	card = substream->pcm->card;
+	(void)card;
 
 	if (runtime->status->state == SNDRV_PCM_STATE_OPEN ||
 	    runtime->status->state == SNDRV_PCM_STATE_DISCONNECTED ||
@@ -2070,6 +2071,7 @@ static int snd_pcm_open_file(struct file *file,
 	pcm_file->substream = substream;
 	if (substream->ref_count == 1) {
 		str = substream->pstr;
+		(void)str;
 		substream->file = pcm_file;
 		substream->pcm_release = pcm_release_private;
 	}

@@ -570,6 +570,7 @@ void spi_unregister_master(struct spi_master *master)
 
 	dummy = device_for_each_child(master->dev.parent, &master->dev,
 					__unregister);
+	(void)dummy;
 	device_unregister(&master->dev);
 }
 EXPORT_SYMBOL_GPL(spi_unregister_master);

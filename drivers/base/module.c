@@ -60,6 +60,7 @@ void module_add_driver(struct module *mod, struct device_driver *drv)
 
 	/* Don't check return codes; these calls are idempotent */
 	no_warn = sysfs_create_link(&drv->p->kobj, &mk->kobj, "module");
+	(void)no_warn;
 	driver_name = make_driver_name(drv);
 	if (driver_name) {
 		module_create_drivers_dir(mk);

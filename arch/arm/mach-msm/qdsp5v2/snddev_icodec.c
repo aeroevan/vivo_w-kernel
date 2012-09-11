@@ -514,6 +514,7 @@ static int snddev_icodec_set_device_volume_impl(
 		afe_path_id = AFE_HW_PATH_CODEC_RX;
 	} else
 		afe_path_id = AFE_HW_PATH_CODEC_TX;
+    (void)afe_path_id;
 
 	if (icodec->data->dev_vol_type & SNDDEV_DEV_VOL_DIGITAL) {
 

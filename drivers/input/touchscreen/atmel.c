@@ -331,6 +331,7 @@ static ssize_t atmel_regdump_show(struct device *dev,
 	if (!ts_data->id->num_declared_objects)
 		return count;
 	numObj = ts_data->id->num_declared_objects - 1;
+	(void)numObj;
 	startAddr = get_object_address(ts_data, GEN_POWERCONFIG_T7);
 	endAddr = get_object_address(ts_data, SPT_CTECONFIG_T28);
 	endAddr += get_object_size(ts_data, SPT_CTECONFIG_T28) - 1;
@@ -935,6 +936,7 @@ static void atmel_ts_work_func(struct work_struct *work)
 
 	ret = i2c_atmel_read(ts->client, get_object_address(ts,
 		GEN_MESSAGEPROCESSOR_T5), data, 7);
+	(void)ret;
 
 	if (ts->debug_log_level & 0x1) {
 		for (loop_i = 0; loop_i < 7; loop_i++)
