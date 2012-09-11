@@ -325,6 +325,10 @@ struct tty_struct {
 	/* If the tty has a pending do_SAK, queue it here - akpm */
 	struct work_struct SAK_work;
 	struct tty_port *port;
+
+	/* spinklock for changing receive_room */
+	spinlock_t rcv_lock;
+	int is_rcvlock;
 };
 
 /* tty magic number */

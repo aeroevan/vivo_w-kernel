@@ -1,6 +1,5 @@
 obj-y += modem_notifier.o
 
-obj-$(CONFIG_MSM_SMD) += htc_port_list.o
 obj-$(CONFIG_MSM_SDIO_AL) += sdio_al.o
 obj-$(CONFIG_MSM_SDIO_AL_TEST) += sdio_al_test.o
 obj-$(CONFIG_MSM_SMD) += smem_log.o

@@ -833,9 +833,9 @@ static int vpe_proc_general(struct msm_vpe_cmd *cmd)
 						vpe_buf->cbcr_phy,
 						&(vpe_buf->ts));
 
-		if (!qcmd || !qcmd->on_heap)
+		if (!qcmd || !atomic_read(&qcmd->on_heap))
 			return -1;
-		if (!--qcmd->on_heap)
+		if (!atomic_sub_return(1, &qcmd->on_heap))
 			kfree(qcmd);
 		break;
 	}

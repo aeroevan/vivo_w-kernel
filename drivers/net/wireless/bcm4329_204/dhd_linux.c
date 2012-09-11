@@ -71,6 +71,7 @@ struct dhd_bus *g_bus;
 
 static struct wifi_platform_data *wifi_control_data = NULL;
 static struct resource *wifi_irqres = NULL;
+static int module_remove = 0;
 
 #if 0
 extern int htc_linux_periodic_wakeup_init(void);
@@ -995,6 +996,12 @@ dhd_start_xmit(struct sk_buff *skb, struct net_device *net)
 	int ifidx;
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
+	if (module_remove) {
+		DHD_ERROR(("%s: module removed.", __FUNCTION__));
+		netif_stop_queue(net);
+		dev_kfree_skb(skb); // Add to free skb
+		return -ENODEV;
+	}
 
 	/* Reject if down */
 	if (!dhd->pub.up || (dhd->pub.busstate == DHD_BUS_DOWN)) {
@@ -1078,6 +1085,20 @@ dhd_rx_frame(dhd_pub_t *dhdp, int ifidx, void *pktbuf, int numpkt)
 	wl_event_msg_t event;
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
+
+	if (module_remove || (!dhd->pub.up)) {
+		for (i = 0; pktbuf && i < numpkt; i++, pktbuf = pnext) {
+			pnext = PKTNEXT(dhdp->osh, pktbuf);
+			PKTSETNEXT(wl->sh.osh, pktbuf, NULL);
+			skb = PKTTONATIVE(dhdp->osh, pktbuf);
+			dev_kfree_skb_any(skb);
+		}
+		if (dhd->pub.up != 1)
+			DHD_ERROR(("%s: dongle not up, skip\n", __FUNCTION__));
+		else
+			DHD_ERROR(("%s: module removed. skip rx frame\n", __FUNCTION__));
+		return;
+	}
 
 	save_pktbuf = pktbuf;
 
@@ -1580,6 +1601,10 @@ dhd_ioctl_entry(struct net_device *net, struct ifreq *ifr, int cmd)
 	int ifidx;
 	bool is_set_key_cmd;
 
+	if (module_remove) {
+		DHD_ERROR(("%s: module removed. cmd 0x%04x\n", __FUNCTION__, cmd));
+		return -1;
+	}
 
 	/* BRCM: anthoy, add for debug, reject if down */
 	if ( !dhd->pub.up || (dhd->pub.busstate == DHD_BUS_DOWN)){
@@ -1738,6 +1763,11 @@ dhd_open(struct net_device *net)
 	uint32 toe_ol;
 #endif
 	int ifidx;
+
+	if (module_remove) {
+		DHD_ERROR(("%s: module removed. Just return.\n", __FUNCTION__));
+		return -1;
+	}
 
 	wl_control_wl_start(net);  /* start if needed */
 
@@ -2403,6 +2433,7 @@ dhd_module_cleanup(void)
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
 	disable_dev_wlc_ioctl();
+	module_remove = 1;
 	DHD_DEFAULT((KERN_INFO "%s: bcm4329 module remove\n", __func__));
 #if 0
 	htc_linux_periodic_wakeup_stop();

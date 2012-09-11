@@ -90,6 +90,9 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
 {
 	struct mmc_command *cmd = mrq->cmd;
 	int err = cmd->error;
+#ifdef CONFIG_MMC_PERF_PROFILING
+	ktime_t diff;
+#endif
 
 	if (err && cmd->retries && mmc_host_is_spi(host)) {
 		if (cmd->resp[0] & R1_SPI_ILLEGAL_COMMAND)
@@ -112,6 +115,20 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
 			cmd->resp[2], cmd->resp[3]);
 
 		if (mrq->data) {
+#ifdef CONFIG_MMC_PERF_PROFILING
+			diff = ktime_sub(ktime_get(), host->perf.start);
+			if (mrq->data->flags == MMC_DATA_READ) {
+				host->perf.rbytes_drv +=
+						mrq->data->bytes_xfered;
+				host->perf.rtime_drv =
+					ktime_add(host->perf.rtime_drv, diff);
+			} else {
+				host->perf.wbytes_drv +=
+						 mrq->data->bytes_xfered;
+				host->perf.wtime_drv =
+					ktime_add(host->perf.wtime_drv, diff);
+			}
+#endif
 			pr_debug("%s:     %d bytes transferred: %d\n",
 				mmc_hostname(host),
 				mrq->data->bytes_xfered, mrq->data->error);
@@ -186,6 +203,10 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 			mrq->stop->error = 0;
 			mrq->stop->mrq = mrq;
 		}
+
+#ifdef CONFIG_MMC_PERF_PROFILING
+		host->perf.start = ktime_get();
+#endif
 	}
 	host->ops->request(host, mrq);
 }
@@ -1099,6 +1120,29 @@ void mmc_detect_change(struct mmc_host *host, unsigned long delay)
 }
 
 EXPORT_SYMBOL(mmc_detect_change);
+
+int mmc_reinit_card(struct mmc_host *host)
+{
+	int err = 0;
+	printk(KERN_INFO "%s: %s\n", mmc_hostname(host),
+		__func__);
+
+	mmc_bus_get(host);
+	if (host->bus_ops && !host->bus_dead &&
+		host->bus_ops->resume) {
+		if (host->card && mmc_card_sd(host->card)) {
+			mmc_power_off(host);
+			mdelay(5);
+		}
+		mmc_power_up(host);
+		err = host->bus_ops->resume(host);
+	}
+
+	mmc_bus_put(host);
+	printk(KERN_INFO "%s: %s return %d\n", mmc_hostname(host),
+		__func__, err);
+	return err;
+}
 
 void mmc_remove_sd_card(struct work_struct *work)
 {

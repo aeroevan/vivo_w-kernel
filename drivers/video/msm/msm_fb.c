@@ -994,7 +994,12 @@ static int msmfb_ioctl(struct fb_info *p, unsigned int cmd, unsigned long arg)
 		break;
 #ifdef CONFIG_FB_MSM_OVERLAY
 	case MSMFB_OVERLAY_GET:
-		ret = msmfb_overlay_get(p, argp);
+		if(!atomic_read(&mdpclk_on)) {
+			printk(KERN_ERR "MSMFB_OVERLAY_GET during suspend\n");
+			ret = -EINVAL;
+		} else
+			ret = msmfb_overlay_get(p, argp);
+		printk(KERN_INFO "MSMFB_OVERLAY_GET ret=%d\n", ret);
 		break;
 	case MSMFB_OVERLAY_SET:
 		if(!atomic_read(&mdpclk_on)) {

@@ -125,7 +125,8 @@ struct kgsl_shadowprop {
 	unsigned int flags; /* contains KGSL_FLAGS_ values */
 };
 
-#ifdef CONFIG_ARCH_MSM7X30
+#if defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60)
+#include <mach/msm_bus.h>
 struct kgsl_platform_data {
 	unsigned int high_axi_2d;
 	unsigned int high_axi_3d;
@@ -136,10 +137,32 @@ struct kgsl_platform_data {
 	unsigned int min_grp3d_freq;
 	int (*set_grp3d_async)(void);
 	const char *imem_clk_name;
+	const char *imem_pclk_name;
 	const char *grp3d_clk_name;
+	const char *grp3d_pclk_name;
 	const char *grp2d0_clk_name;
+	const char *grp2d0_pclk_name;
+	const char *grp2d1_clk_name;
+	const char *grp2d1_pclk_name;
+	unsigned int idle_timeout_2d;
+	unsigned int idle_timeout_3d;
+	struct msm_bus_scale_pdata *grp3d_bus_scale_table;
+	struct msm_bus_scale_pdata *grp2d0_bus_scale_table;
+	struct msm_bus_scale_pdata *grp2d1_bus_scale_table;
+	unsigned int nap_allowed;
+	unsigned int pt_va_size;
+	unsigned int pt_max_count;
 };
 #endif
+
+/* structure holds list of ibs */
+struct kgsl_ibdesc {
+	unsigned int gpuaddr;
+	void *hostptr;
+	unsigned int sizedwords;
+	unsigned int ctrl;
+};
+
 /* ioctls */
 #define KGSL_IOC_TYPE 0x09
 

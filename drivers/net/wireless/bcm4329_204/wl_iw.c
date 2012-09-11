@@ -4713,10 +4713,6 @@ wl_iw_iscan_get_scan(
   }
 	WL_DEFAULT(("%s return to WE %d bytes APs=%d\n", __func__, dwrq->length, counter));
 
-	if (!dwrq->length) {
-		WL_DEFAULT(("%s: EAGAIN!\n", __FUNCTION__));
-		return -EAGAIN;
-	}
 	return 0;
 }
 #endif

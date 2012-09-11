@@ -517,7 +517,7 @@ int android_switch_function(unsigned func)
 		usb_gadget_disconnect(dev->cdev->gadget);
 		msleep(10);
 		usb_gadget_connect(dev->cdev->gadget);
-		}
+	}
 #endif
 	return 0;
 }
@@ -529,7 +529,14 @@ void android_enable_function(struct usb_function *f, int enable)
 	int product_id;
 
 	if (!!f->hidden != disable) {
+		printk(KERN_INFO "%s: set %s %s\n", __func__, f->name,
+				disable ? "off" : "on");
+
 		f->hidden = disable;
+		/* send uevent when state changed */
+		if (f && (f->dev))
+			kobject_uevent(&f->dev->kobj, KOBJ_CHANGE);
+
 		product_id = get_product_id(dev);
 		device_desc.idProduct = __constant_cpu_to_le16(product_id);
 		if (dev->cdev)
@@ -550,6 +557,8 @@ void android_enable_function(struct usb_function *f, int enable)
 		else
 			dev->cdev->desc.bDeviceClass = USB_CLASS_PER_INTERFACE;
 #ifdef CONFIG_USB_GADGET_MSM_72K
+		if (!strcmp(f->name, "adb") || !strcmp(f->name, "mtp"))
+			composite_func_enable_event(dev->cdev);
 		msm_hsusb_request_reset();
 #else
 		/* force reenumeration */

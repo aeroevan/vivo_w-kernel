@@ -1046,11 +1046,14 @@ static void flush_endpoint(struct msm_endpoint *ept)
 	flush_endpoint_sw(ept);
 }
 
-static void handle_notify_offline(struct usb_info *ui)
+static void handle_notify_offline(struct usb_info *ui, int mute)
 {
 	if (ui->driver) {
 		printk(KERN_INFO "%s: notify offline\n", __func__);
-		ui->driver->disconnect(&ui->gadget);
+		if (mute)
+			ui->driver->mute_disconnect(&ui->gadget);
+		else
+			ui->driver->disconnect(&ui->gadget);
 	}
 	/* cancel pending ep0 transactions */
 	flush_endpoint(&ui->ep0out);
@@ -1100,7 +1103,7 @@ static irqreturn_t usb_interrupt(int irq, void *data)
 			*/
 			ui->online = 0;
 
-			handle_notify_offline(ui);
+			handle_notify_offline(ui, 1);
 		}
 		if (ui->connect_type != CONNECT_TYPE_USB) {
 			ui->connect_type = CONNECT_TYPE_USB;
@@ -1183,7 +1186,7 @@ static ssize_t store_usb_function_switch(struct device *dev,
 		return 0;
 }
 
-static DEVICE_ATTR(usb_function_switch, 0666,
+static DEVICE_ATTR(usb_function_switch, 0664,
 	show_usb_function_switch, store_usb_function_switch);
 
 static ssize_t show_usb_serial_number(struct device *dev,
@@ -1356,7 +1359,7 @@ static ssize_t store_usb_phy_setting(struct device *dev,
 	return 0;
 }
 
-static DEVICE_ATTR(usb_phy_setting, 0666,
+static DEVICE_ATTR(usb_phy_setting, 0664,
 	show_usb_phy_setting, store_usb_phy_setting);
 
 #ifdef CONFIG_USB_ACCESSORY_DETECT
@@ -1615,7 +1618,7 @@ static void usb_reset(struct usb_info *ui)
 	/* marking us offline will cause ept queue attempts to fail */
 	ui->online = 0;
 
-	handle_notify_offline(ui);
+	handle_notify_offline(ui, 1);
 
 	/* enable interrupts */
 	writel(STS_URI | STS_SLI | STS_UI | STS_PCI, USB_USBINTR);
@@ -1909,7 +1912,13 @@ static void accessory_detect_by_adc(struct usb_info *ui)
 			printk(KERN_INFO "usb: headset inserted\n");
 			ui->accessory_type = 2;
 			headset_ext_detect(USB_AUDIO_OUT);
-		} else if (adc_value >= 0x88A && adc_value <= 0x1E38) {
+		} else if (adc_value >= 0x401D && adc_value <= 0x45EE) {
+			/* Cradle: 0.551 mV ~ 0.601 mV */
+			printk(KERN_INFO "usb: Desk Cradle inserted\n");
+			ui->accessory_type = 3;
+			switch_set_state(&dock_switch, DOCK_STATE_DESK);
+			printk(KERN_INFO "usb: Desk Cradle: set state %d\n", DOCK_STATE_DESK);
+		} else if (adc_value >= 0x1174 && adc_value <= 0x1E38) {
 			printk(KERN_INFO "usb: carkit inserted\n");
 			ui->accessory_type = 1;
 			if ((board_mfg_mode() == 0) || (board_mfg_mode() == 1 &&
@@ -1920,16 +1929,26 @@ static void accessory_detect_by_adc(struct usb_info *ui)
 		} else
 			ui->accessory_type = 0;
 	} else {
-		if (ui->accessory_type == 2) {
-			printk(KERN_INFO "usb: headset removed\n");
-			headset_ext_detect(USB_NO_HEADSET);
-		} else if (ui->accessory_type == 1) {
+		switch (ui->accessory_type) {
+		case 1:
 			printk(KERN_INFO "usb: carkit removed\n");
 			switch_set_state(&dock_switch, DOCK_STATE_UNDOCKED);
+			ui->accessory_type = 0;
+			break;
+		case 2:
+			printk(KERN_INFO "usb: headset removed\n");
+			headset_ext_detect(USB_NO_HEADSET);
+			ui->accessory_type = 0;
+			break;
+		case 3:
+			printk(KERN_INFO "usb: Desk Cradle removed\n");
+			switch_set_state(&dock_switch, DOCK_STATE_UNDOCKED);
+			ui->accessory_type = 0;
+			break;
+		default:
+			break;
 		}
-		ui->accessory_type = 0;
 	}
-
 }
 #endif
 
@@ -1977,6 +1996,7 @@ static void accessory_detect_init(struct usb_info *ui)
 	if (ui->idpin_irq == 0)
 		ui->idpin_irq = gpio_to_irq(ui->usb_id_pin_gpio);
 
+	set_irq_flags(ui->idpin_irq, IRQF_VALID | IRQF_NOAUTOEN);
 	ret = request_irq(ui->idpin_irq, usbid_interrupt,
 				IRQF_TRIGGER_LOW,
 				"car_kit_irq", ui);
@@ -1999,6 +2019,8 @@ static void accessory_detect_init(struct usb_info *ui)
 	ret = device_create_file(dock_switch.dev, &dev_attr_status);
 	if (ret != 0)
 		printk(KERN_WARNING "dev_attr_status failed\n");
+
+	enable_irq(ui->idpin_irq);
 
 	return;
 err:
@@ -2062,13 +2084,8 @@ static void charger_detect(struct usb_info *ui)
 			DELAY_FOR_CHECK_CHG);
 		mod_timer(&ui->ac_detect_timer, jiffies + (3 * HZ));
 	} else {
-		if (gpio_get_value(ui->usb_id_pin_gpio) == 0) {
-			printk(KERN_INFO "usb: 9V AC charger\n");
-			ui->connect_type = CONNECT_TYPE_9V_AC;
-		} else {
-			printk(KERN_INFO "usb: AC charger\n");
-			ui->connect_type = CONNECT_TYPE_AC;
-		}
+		printk(KERN_INFO "usb: AC charger\n");
+		ui->connect_type = CONNECT_TYPE_AC;
 		queue_work(ui->usb_wq, &ui->notifier_work);
 		writel(0x00080000, USB_USBCMD);
 		msleep(10);
@@ -2153,7 +2170,7 @@ static void usb_do_work(struct work_struct *w)
 					msleep(5);
 				}
 
-				handle_notify_offline(ui);
+				handle_notify_offline(ui, 0);
 
 				if (ui->phy_reset)
 					ui->phy_reset();

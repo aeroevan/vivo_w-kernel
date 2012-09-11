@@ -730,7 +730,7 @@ static ssize_t show_enable(struct device *dev, struct device_attribute *attr,
 	return 2;
 
 }
-static DEVICE_ATTR(enable, 0666, show_enable, store_enable);
+static DEVICE_ATTR(enable, 0664, show_enable, store_enable);
 
 static void prj_dev_release(struct device *dev) {}
 

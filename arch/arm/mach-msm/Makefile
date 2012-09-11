@@ -21,11 +21,16 @@ obj-$(CONFIG_ARCH_QSD8X50) += pmic.o htc_wifi_nvs.o htc_bluetooth.o
 obj-$(CONFIG_MSM_FIQ_SUPPORT) += fiq_glue.o
 obj-$(CONFIG_MACH_TROUT) += board-trout-rfkill.o
 
+ifdef CONFIG_MSM_NONSMD_PACKET_FILTER
+obj-$(CONFIG_MSM_SMD) += htc_port_list_lte.o
+else
+obj-$(CONFIG_MSM_SMD) += htc_port_list.o
+endif
+
 obj-$(CONFIG_ARCH_MSM7X30) += rpc_hsusb.o
 
 obj-y += remote_spinlock.o
 ifndef CONFIG_QCT_LTE
-obj-$(CONFIG_MSM_SMD) += htc_port_list.o
 obj-$(CONFIG_ARCH_MSM7X30) += rpc_pmapp.o smd_rpcrouter_clients.o
 obj-$(CONFIG_MSM_SMD) += smd.o smd_debug.o
 obj-$(CONFIG_MSM_SMD) += smem_log.o

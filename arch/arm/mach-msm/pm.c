@@ -864,8 +864,11 @@ static int set_offmode_alarm(void)
 
 	getnstimeofday(&rtc_now);
 	for (i = 0; i < offalarm_size; i++) {
-		next_alarm_interval = (offalarm[i] - rtc_now.tv_sec) * 1000;
-		if (next_alarm_interval > 0) {
+		if (offalarm[i] > rtc_now.tv_sec) {
+			next_alarm_interval = offalarm[i] - rtc_now.tv_sec;
+			if (next_alarm_interval > 604800)	/* ignore alarm if the interval of timer is over one week */
+				continue;
+			next_alarm_interval = next_alarm_interval * 1000;	/* convert to msec */
 			if (msm_wakeup_after == 0)
 				msm_wakeup_after = next_alarm_interval;
 			else if (next_alarm_interval < msm_wakeup_after)
@@ -879,11 +882,10 @@ static int set_offmode_alarm(void)
 
 static void msm_pm_power_off(void)
 {
-	printk(KERN_INFO "msm_pm_power_off:wakeup after %d\r\n", msm_wakeup_after);
-
 #ifdef CONFIG_HTC_OFFMODE_ALARM
 	set_offmode_alarm();
 #endif
+	printk(KERN_INFO "msm_pm_power_off:wakeup after %d\r\n", msm_wakeup_after);
 	if (msm_wakeup_after)
 		msm_proc_comm(PCOM_SET_RTC_ALARM, &msm_wakeup_after, 0);
 

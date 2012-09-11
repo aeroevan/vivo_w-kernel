@@ -45,7 +45,6 @@
 #include "queue.h"
 
 MODULE_ALIAS("mmc:block");
-
 /*
  * max 8 partitions per card
  */
@@ -57,6 +56,7 @@ MODULE_ALIAS("mmc:block");
 #define MMC_NUM_MINORS	(256 >> MMC_SHIFT)
 
 extern int board_emmc_boot(void);
+extern int mmc_reinit_card(struct mmc_host *host);
 
 static DECLARE_BITMAP(dev_use, MMC_NUM_MINORS);
 
@@ -315,6 +315,10 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 	int err = 0;
 	int try_recovery = 1, do_reinit = 0, do_remove = 0;
 
+#ifdef CONFIG_MMC_PERF_PROFILING
+	ktime_t start,diff;
+#endif
+
 #ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
 	int retries = 3;
 	if (mmc_bus_needs_resume(card->host)) {
@@ -476,13 +480,24 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 			}
 			brq.data.sg_len = i;
 		}
-
+#ifdef CONFIG_MMC_PERF_PROFILING
+		if (mmc_card_sd(card)) {
+			start = ktime_get();
+		}
+#endif
 		mmc_queue_bounce_pre(mq);
 
 		mmc_wait_for_req(card->host, &brq.mrq);
 
 		mmc_queue_bounce_post(mq);
 
+#ifdef CONFIG_MMC_PERF_PROFILING
+		if (mmc_card_sd(card)) {
+			diff = ktime_sub(ktime_get(), start);
+			if (ktime_to_us(diff) > 35000)
+				printk(KERN_DEBUG "%s:(%s)finish cmd(%d) time=%lld \n", __func__, current->comm, brq.cmd.opcode, ktime_to_us(diff));
+		}
+#endif
 		/*
 		 * Check for errors here, but don't jump to cmd_err
 		 * until later as we need to wait for the card to leave
@@ -587,7 +602,13 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 				i++;
 			} while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
 				(R1_CURRENT_STATE(cmd.resp[0]) == 7));
-
+#ifdef CONFIG_MMC_PERF_PROFILING
+		if (mmc_card_sd(card)) {
+				diff = ktime_sub(ktime_get(), start);
+				if (ktime_to_us(diff) > 100000)
+					printk(KERN_DEBUG "%s: ---(%s) start sector=%d, size %d, total time=%lld microseconds\n", __func__, current->comm, brq.cmd.arg, blk_rq_sectors(req) , ktime_to_us(diff));
+		}
+#endif
 #if 0
 			if (cmd.resp[0] & ~0x00000900)
 				printk(KERN_ERR "%s: status = %08x\n",
@@ -605,8 +626,7 @@ recovery:
 				goto cmd_err;
 			printk(KERN_INFO "%s: reinit card\n",
 				mmc_hostname(card->host));
-			card->host->bus_resume_flags |= MMC_BUSRESUME_NEEDS_RESUME;
-			err = mmc_resume_bus(card->host);
+			err = mmc_reinit_card(card->host);
 			if (!err) {
 				mmc_blk_set_blksize(md, card);
 				continue;

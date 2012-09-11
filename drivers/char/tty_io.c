@@ -2770,6 +2770,7 @@ void initialize_tty_struct(struct tty_struct *tty,
 	mutex_init(&tty->echo_lock);
 	spin_lock_init(&tty->read_lock);
 	spin_lock_init(&tty->ctrl_lock);
+	spin_lock_init(&tty->rcv_lock);
 	INIT_LIST_HEAD(&tty->tty_files);
 	INIT_WORK(&tty->SAK_work, do_SAK_work);
 
@@ -2777,6 +2778,12 @@ void initialize_tty_struct(struct tty_struct *tty,
 	tty->ops = driver->ops;
 	tty->index = idx;
 	tty_line_name(driver, idx, tty->name);
+
+	if (driver->need_rcv_lock) {
+		printk(KERN_INFO "%s: set rcv_room lock for %s\n",
+			__func__, tty->name);
+		tty->is_rcvlock = 1;
+	}
 }
 
 /**

@@ -80,6 +80,8 @@
 #define RX_QUEUE_SIZE	96
 #define WRITE_BUF_SIZE		8192		/* TX only */
 
+bool MODEM_DEBUG_ON;
+
 static struct workqueue_struct *gs_tty_wq;
 /* circular buffer */
 struct gs_buf {
@@ -116,6 +118,7 @@ struct gs_port {
 
 	/* REVISIT this state ... */
 	struct usb_cdc_line_coding port_line_coding;	/* 8-N-1 etc */
+	int	rx_qcnt;
 };
 
 /* increase N_PORTS if you need more */
@@ -518,6 +521,9 @@ static void gs_rx_push(struct work_struct *work)
 				size -= n;
 			}
 
+			if (MODEM_DEBUG_ON)
+				printk(KERN_INFO "%d: tty_insert %d\n", port->port_num, size);
+
 			count = tty_insert_flip_string(tty, packet, size);
 			if (count)
 				do_push = true;
@@ -533,6 +539,7 @@ static void gs_rx_push(struct work_struct *work)
 		}
 recycle:
 		list_move(&req->list, &port->read_pool);
+		port->rx_qcnt--;
 	}
 
 	/* Push from tty to ldisc; without low_latency set this is handled by
@@ -586,6 +593,8 @@ static void gs_read_complete(struct usb_ep *ep, struct usb_request *req)
 		return;
 	}
 
+	if (MODEM_DEBUG_ON)
+		printk(KERN_INFO "%s: %d bytes\n", __func__, req->actual);
 
 	switch (req->status) {
 	case 0:
@@ -594,9 +603,11 @@ static void gs_read_complete(struct usb_ep *ep, struct usb_request *req)
 			list_add_tail(&req->list, &port->read_queue);
 			queue_work(gs_tty_wq, &port->push_work);
 		} else {
-			printk("%s: TTY_THROTTLED\n", __func__);
+			printk(KERN_INFO "%s: TTY_THROTTLED, cnt:%d\n",
+				__func__, port->rx_qcnt);
 			list_add_tail(&req->list, &port->read_queue);
 		}
+		port->rx_qcnt++;
 		spin_unlock(&port->port_lock);
 		break;
 	case -ESHUTDOWN:
@@ -626,6 +637,9 @@ static void gs_write_complete(struct usb_ep *ep, struct usb_request *req)
 {
 	struct gs_port	*port = ep->driver_data;
 	unsigned long flags;
+
+	if (MODEM_DEBUG_ON)
+		printk(KERN_INFO "%s: %d bytes\n", __func__, req->actual);
 
 	spin_lock_irqsave(&port->port_lock, flags);
 	list_add(&req->list, &port->write_pool);
@@ -1016,7 +1030,8 @@ static void gs_unthrottle(struct tty_struct *tty)
 		 * read queue backs up enough we'll be NAKing OUT packets.
 		 */
 		queue_work(gs_tty_wq, &port->push_work);
-		pr_vdebug(PREFIX "%d: unthrottle\n", port->port_num);
+		if (MODEM_DEBUG_ON)
+			printk(KERN_INFO "%d: unthrottle\n", port->port_num);
 	}
 	spin_unlock_irqrestore(&port->port_lock, flags);
 }
@@ -1150,6 +1165,8 @@ gs_port_alloc(unsigned port_num, struct usb_cdc_line_coding *coding)
 	port->port_num = port_num;
 	port->port_line_coding = *coding;
 
+	port->rx_qcnt = 0;
+
 	ports[port_num].port = port;
 
 	return 0;
@@ -1235,6 +1252,8 @@ int __init gserial_setup(struct usb_gadget *g, unsigned count)
 		}
 	}
 	n_ports = count;
+
+	gs_tty_driver->need_rcv_lock = 1;
 
 	/* export the driver ... */
 	status = tty_register_driver(gs_tty_driver);
@@ -1373,6 +1392,7 @@ int gserial_connect(struct gserial *gser, u8 port_num)
 	spin_lock_irqsave(&port->port_lock, flags);
 	gser->ioport = port;
 	port->port_usb = gser;
+	port->rx_qcnt = 0;
 
 	/* REVISIT unclear how best to handle this state...
 	 * we don't really couple it with the Linux TTY.
@@ -1458,3 +1478,14 @@ void gserial_disconnect(struct gserial *gser)
 	gs_free_requests(gser->in, &port->write_pool);
 	spin_unlock_irqrestore(&port->port_lock, flags);
 }
+
+static int modem_debug_enabled(const char *val, struct kernel_param *kp)
+{
+	int enabled = simple_strtol(val, NULL, 0);
+
+	MODEM_DEBUG_ON = (enabled) ? true : false;
+	return 0;
+}
+
+module_param_call(modem_debug, modem_debug_enabled, NULL, NULL, 0664);
+

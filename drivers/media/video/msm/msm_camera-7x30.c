@@ -45,6 +45,7 @@ DEFINE_MUTEX(hlist_mut);
 
 DEFINE_MUTEX(pp_prev_lock);
 DEFINE_MUTEX(pp_snap_lock);
+DEFINE_MUTEX(ctrl_cmd_lock);
 
 #define MSM_MAX_CAMERA_SENSORS 5
 #define CAMERA_STOP_SNAPSHOT 42
@@ -94,9 +95,9 @@ int g_v4l2_opencnt;
 
 static inline void free_qcmd(struct msm_queue_cmd *qcmd)
 {
-	if (!qcmd || !qcmd->on_heap)
+	if (!qcmd || !atomic_read(&qcmd->on_heap))
 		return;
-	if (!--qcmd->on_heap)
+	if (!atomic_sub_return(1, &qcmd->on_heap))
 		kfree(qcmd);
 }
 
@@ -156,11 +157,14 @@ static void msm_enqueue_vpe(struct msm_device_queue *queue,
 	struct msm_device_queue *__q = (queue);			\
 	struct msm_queue_cmd *qcmd = 0;				\
 	spin_lock_irqsave(&__q->lock, flags);			\
+	if (!__q->len)   \
+		pr_info("[CAM]%s: queue name: %s: queue len: %d", \
+				__func__, __q->name, __q->len); \
 	if (!list_empty(&__q->list)) {				\
 		__q->len--;					\
 		qcmd = list_first_entry(&__q->list,		\
 				struct msm_queue_cmd, member);	\
-		if (qcmd) {                         \
+		if ((qcmd) && (&qcmd->member) && (&qcmd->member.next)) {  \
 		list_del_init(&qcmd->member);			\
 		}                                   \
 	}												\
@@ -175,6 +179,8 @@ static void msm_enqueue_vpe(struct msm_device_queue *queue,
 	spin_lock_irqsave(&__q->lock, flags);			\
 	CDBG("%s: draining queue %s\n", __func__, __q->name);	\
 	while (!list_empty(&__q->list)) {			\
+		__q->len--;					\
+		pr_info("[CAM]%s,q->len = %d\n", __func__, __q->len);	\
 		qcmd = list_first_entry(&__q->list,		\
 			struct msm_queue_cmd, member);		\
 		if (qcmd) {                         \
@@ -715,7 +721,7 @@ static struct msm_queue_cmd *__msm_control_nb(struct msm_sync *sync,
 	udata->value = udata + 1;
 	memcpy(udata->value, udata_to_copy->value, udata_to_copy->length);
 
-	qcmd->on_heap = 1;
+	atomic_set(&qcmd->on_heap, 1);
 
 	/* qcmd_resp will be set to NULL */
 	return __msm_control(sync, NULL, qcmd, 0);
@@ -745,7 +751,7 @@ static int msm_control(struct msm_control_device *ctrl_pmsm,
 	if (udata.type == CAMERA_STOP_SNAPSHOT)
 		sync->get_pic_abort = 1;
 
-	qcmd.on_heap = 0;
+	atomic_set(&(qcmd.on_heap), 0);
 	qcmd.type = MSM_CAM_Q_CTRL;
 	qcmd.command = &udata;
 
@@ -1111,7 +1117,7 @@ static int msm_ctrl_cmd_done(struct msm_control_device *ctrl_pmsm,
 		return -EFAULT;
 	}
 
-	qcmd->on_heap = 0;
+	atomic_set(&qcmd->on_heap, 0);
 	qcmd->command = command;
 	uptr = command->value;
 
@@ -2111,7 +2117,9 @@ static long msm_ioctl_control(struct file *filep, unsigned int cmd,
 	case MSM_CAM_IOCTL_CTRL_COMMAND:
 		/* Coming from control thread, may need to wait for
 		 * command status */
+		mutex_lock(&ctrl_cmd_lock);
 		rc = msm_control(ctrl_pmsm, 1, argp);
+		mutex_unlock(&ctrl_cmd_lock);
 		break;
 	case MSM_CAM_IOCTL_CTRL_COMMAND_2:
 		/* Sends a message, returns immediately */
@@ -2301,7 +2309,7 @@ static void *msm_vfe_sync_alloc(int size,
 		/* Becker and kant */
 		memset(qcmd, 0x0, sizeof(struct msm_queue_cmd) + size);
 
-		qcmd->on_heap = 1;
+		atomic_set(&qcmd->on_heap, 1);
 		return qcmd + 1;
 	}
 	return NULL;
@@ -2314,7 +2322,7 @@ static void *msm_vpe_sync_alloc(int size,
        struct msm_queue_cmd *qcmd =
                kmalloc(sizeof(struct msm_queue_cmd) + size, gfp);
        if (qcmd) {
-               qcmd->on_heap = 1;
+		atomic_set(&qcmd->on_heap, 1);
                return qcmd + 1;
        }
        return NULL;
@@ -2326,7 +2334,7 @@ static void msm_vfe_sync_free(void *ptr)
 		struct msm_queue_cmd *qcmd =
 			(struct msm_queue_cmd *)ptr;
 		qcmd--;
-		if (qcmd->on_heap)
+		if (atomic_read(&qcmd->on_heap))
 			kfree(qcmd);
 	}
 }
@@ -2337,7 +2345,7 @@ static void msm_vpe_sync_free(void *ptr)
                struct msm_queue_cmd *qcmd =
                        (struct msm_queue_cmd *)ptr;
                qcmd--;
-               if (qcmd->on_heap)
+		if (atomic_read(&qcmd->on_heap))
                        kfree(qcmd);
        }
 }
@@ -2391,8 +2399,8 @@ static void msm_vfe_sync(struct msm_vfe_resp *vdata,
 		}
 		CDBG("%s: msm_enqueue frame_q\n", __func__);
 		msm_enqueue(&sync->frame_q, &qcmd->list_frame);
-		if (qcmd->on_heap)
-			qcmd->on_heap++;
+			if (atomic_read(&qcmd->on_heap))
+				atomic_add(1, &qcmd->on_heap);
 		break;
 
         case VFE_MSG_OUTPUT_V:
@@ -2425,8 +2433,8 @@ static void msm_vfe_sync(struct msm_vfe_resp *vdata,
                                         __func__);
                                 msm_enqueue(&sync->frame_q,
                                         &qcmd->list_frame);
-                                if (qcmd->on_heap)
-                                        qcmd->on_heap++;
+			if (atomic_read(&qcmd->on_heap))
+				atomic_add(1, &qcmd->on_heap);
                                 break;
                          }
                 }
@@ -2447,8 +2455,8 @@ static void msm_vfe_sync(struct msm_vfe_resp *vdata,
 			}
 
 		msm_enqueue(&sync->pict_q, &qcmd->list_pict);
-		if (qcmd->on_heap)
-			qcmd->on_heap++;
+			if (atomic_read(&qcmd->on_heap))
+				atomic_add(1, &qcmd->on_heap);
 		break;
 
 	case VFE_MSG_STATS_AWB:
@@ -2505,8 +2513,8 @@ static void msm_vpe_sync(struct msm_vpe_resp *vdata,
        case VPE_MSG_OUTPUT_V:
                CDBG("%s: msm_enqueue video frame_q from VPE \n", __func__);
                msm_enqueue(&sync->frame_q, &qcmd->list_frame);
-               if (qcmd->on_heap)
-                       qcmd->on_heap++;
+			if (atomic_read(&qcmd->on_heap))
+				atomic_add(1, &qcmd->on_heap);
                break;
        default:
                CDBG("%s: qtype %d not handled\n", __func__, vdata->type);
@@ -2676,7 +2684,7 @@ static int __msm_v4l2_control(struct msm_sync *sync,
 	}
 	qcmd->type = MSM_CAM_Q_V4L2_REQ;
 	qcmd->command = out;
-	qcmd->on_heap = 1;
+	atomic_set(&qcmd->on_heap, 1);
 
 	if (out->type == V4L2_CAMERA_EXIT) {
 		rcmd = __msm_control(sync, NULL, qcmd, out->timeout_ms);

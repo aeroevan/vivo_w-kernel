@@ -93,8 +93,13 @@ static inline int tty_put_user(struct tty_struct *tty, unsigned char x,
 
 static void n_tty_set_room(struct tty_struct *tty)
 {
+	int	left;
+	unsigned long flags;
+
+	if (tty->is_rcvlock) {
+		spin_lock_irqsave(&tty->rcv_lock, flags);
 	/* tty->read_cnt is not read locked ? */
-	int	left = N_TTY_BUF_SIZE - tty->read_cnt - 1;
+		left = N_TTY_BUF_SIZE - tty->read_cnt - 1;
 
 	/*
 	 * If we are doing input canonicalization, and there are no
@@ -105,6 +110,21 @@ static void n_tty_set_room(struct tty_struct *tty)
 	if (left <= 0)
 		left = tty->icanon && !tty->canon_data;
 	tty->receive_room = left;
+		spin_unlock_irqrestore(&tty->rcv_lock, flags);
+	} else {
+		/* tty->read_cnt is not read locked ? */
+		left = N_TTY_BUF_SIZE - tty->read_cnt - 1;
+
+		/*
+		 * If we are doing input canonicalization, and there are no
+		 * pending newlines, let characters through without limit, so
+		 * that erase characters will be handled.  Other excess
+		 * characters will be beeped.
+		 */
+		if (left <= 0)
+			left = tty->icanon && !tty->canon_data;
+		tty->receive_room = left;
+	}
 }
 
 static void put_tty_queue_nolock(unsigned char c, struct tty_struct *tty)
@@ -1422,6 +1442,10 @@ static void n_tty_receive_buf(struct tty_struct *tty, const unsigned char *cp,
 	 */
 	if (tty->receive_room < TTY_THRESHOLD_THROTTLE)
 		tty_throttle(tty);
+
+	if (!tty->receive_room && !tty->read_cnt)
+		printk(KERN_ERR "%s, name:%s read_cnt=rcv_room=0!\n",
+			__func__, tty->name);
 }
 
 int is_ignored(int sig)
@@ -1582,9 +1606,17 @@ static int n_tty_open(struct tty_struct *tty)
 	return 0;
 }
 
+extern bool MODEM_DEBUG_ON;
 static inline int input_available_p(struct tty_struct *tty, int amt)
 {
 	tty_flush_to_ldisc(tty);
+
+	if (MODEM_DEBUG_ON) {
+		if (tty->is_rcvlock) {
+			printk(KERN_INFO "%s:%s: read_cnt: %d,rcv_room: %d\n",
+				__func__, tty->name, tty->read_cnt, tty->receive_room);
+		}
+	}
 	if (tty->icanon) {
 		if (tty->canon_data)
 			return 1;

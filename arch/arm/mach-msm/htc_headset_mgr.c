@@ -724,11 +724,14 @@ static ssize_t tty_flag_store(struct device *dev,
 		HS_LOG("Disable TTY");
 		return count;
 	}
-	HS_LOG("tty_enable_flag_store: invalid argument");
+
+	mutex_unlock(&hi->mutex_lock);
+	HS_LOG("Invalid TTY argument");
+
 	return -EINVAL;
 }
 
-static DEVICE_ACCESSORY_ATTR(tty, 0666, tty_flag_show, tty_flag_store);
+static DEVICE_ACCESSORY_ATTR(tty, 0644, tty_flag_show, tty_flag_store);
 
 static ssize_t fm_flag_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -778,15 +781,17 @@ static ssize_t fm_flag_store(struct device *dev,
 		HS_LOG("Disable FM");
 	} else {
 		mutex_unlock(&hi->mutex_lock);
-		HS_LOG("fm_enable_flag_store: invalid argument");
+		HS_LOG("Invalid FM argument");
 		return -EINVAL;
 	}
+
 	switch_set_state(&hi->sdev, state);
 	mutex_unlock(&hi->mutex_lock);
+
 	return count;
 }
 
-static DEVICE_ACCESSORY_ATTR(fm, 0666, fm_flag_show, fm_flag_store);
+static DEVICE_ACCESSORY_ATTR(fm, 0644, fm_flag_show, fm_flag_store);
 
 static ssize_t debug_flag_show(struct device *dev,
 			       struct device_attribute *attr, char *buf)

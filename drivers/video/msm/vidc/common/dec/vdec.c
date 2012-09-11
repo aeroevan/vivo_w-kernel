@@ -954,14 +954,13 @@ static u32 vid_dec_get_next_msg(struct video_client_ctx *client_ctx,
 
 	rc = wait_event_interruptible(client_ctx->msg_wait,
 				      vid_dec_msg_pending(client_ctx));
-	if (rc < 0 || client_ctx->stop_msg) {
+
+	if (rc < 0) {
 		DBG("rc = %d, stop_msg = %u\n", rc, client_ctx->stop_msg);
-		if (rc == -ERESTARTSYS && !client_ctx->stop_msg)
-		{
-			ERR("%s(): by system interrupt (retry), rc = %d\n", __func__, rc);
-			return true;
-		}
-		return false;
+		return rc;
+	} else if (client_ctx->stop_msg) {
+		DBG("rc = %d, stop_msg = %u\n", rc, client_ctx->stop_msg);
+		return -EIO;
 	}
 
 	mutex_lock(&client_ctx->msg_queue_lock);
@@ -1237,11 +1236,14 @@ static int vid_dec_ioctl(struct inode *inode, struct file *file,
 		if (copy_from_user(&vdec_msg, arg, sizeof(vdec_msg)))
 			return -EFAULT;
 		result = vid_dec_get_next_msg(client_ctx, &vdec_msg_info);
-		if (!result)
-			return -EIO;
+
 		if (copy_to_user(vdec_msg.out, &vdec_msg_info,
 					sizeof(vdec_msg_info)))
 			return -EFAULT;
+
+                 if (result)
+			return result;
+
 		break;
 	}
 	case VDEC_IOCTL_STOP_NEXT_MSG:
@@ -1416,12 +1418,16 @@ static int vid_dec_open(struct inode *inode, struct file *file)
 	DBG(" Virtual Address of ioremap is %p\n", vid_dec_device_p->virt_base);
 	if (!vid_dec_device_p->num_clients) {
 		if (!vidc_load_firmware())
+			{
+			mutex_unlock(&vid_dec_device_p->lock);
 			return -ENODEV;
+			}
 	}
 
 	client_index = vid_dec_get_empty_client_index();
 	if (client_index == -1) {
 		ERR("%s() : No free clients client_index == -1\n", __func__);
+		mutex_unlock(&vid_dec_device_p->lock);
 		return -ENODEV;
 	}
 	client_ctx = &vid_dec_device_p->vdec_clients[client_index];

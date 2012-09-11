@@ -52,6 +52,13 @@ static int mmc_queue_thread(void *d)
 	struct request_queue *q = mq->queue;
 	struct request *req;
 
+#ifdef CONFIG_MMC_PERF_PROFILING
+	ktime_t start, diff;
+	struct mmc_host *host = mq->card->host;
+	unsigned long bytes_xfer;
+#endif
+
+
 	current->flags |= PF_MEMALLOC;
 
 	down(&mq->thread_sem);
@@ -116,8 +123,29 @@ static int mmc_queue_thread(void *d)
 			mq->check_status = 0;
 		}
 #endif
+#ifdef CONFIG_MMC_PERF_PROFILING
+		bytes_xfer = blk_rq_bytes(req);
+		if (rq_data_dir(req) == READ) {
+			start = ktime_get();
+			if (!(mq->issue_fn(mq, req)))
+			  printk(KERN_ERR "mmc_blk_issue_rq failed!!\n");
+			diff = ktime_sub(ktime_get(), start);
+			host->perf.rbytes_mmcq += bytes_xfer;
+			host->perf.rtime_mmcq =
+				ktime_add(host->perf.rtime_mmcq, diff);
+		} else {
+			start = ktime_get();
+			if (!(mq->issue_fn(mq, req)))
+			  printk(KERN_ERR "mmc_blk_issue_rq failed!!\n");
+			diff = ktime_sub(ktime_get(), start);
+			host->perf.wbytes_mmcq += bytes_xfer;
+			host->perf.wtime_mmcq =
+				ktime_add(host->perf.wtime_mmcq, diff);
+		}
+#else
 		if (!(mq->issue_fn(mq, req)))
 			printk(KERN_ERR "mmc_blk_issue_rq failed!!\n");
+#endif
 	} while (1);
 	up(&mq->thread_sem);
 

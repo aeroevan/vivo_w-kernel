@@ -67,6 +67,13 @@ enum kgsl_clk_freq {
 /*cache coherency ops */
 #define DRM_KGSL_GEM_CACHE_OP_TO_DEV	0x0001
 #define DRM_KGSL_GEM_CACHE_OP_FROM_DEV	0x0002
+/* The size of each entry in a page table */
+
+#define KGSL_PAGETABLE_ENTRY_SIZE  4
+/* Extra accounting entries needed in the pagetable */
+#define KGSL_PT_EXTRA_ENTRIES      16
+#define KGSL_PAGETABLE_ENTRIES(_sz) (((_sz) >> KGSL_PAGESIZE_SHIFT) + KGSL_PT_EXTRA_ENTRIES)
+
 
 struct kgsl_driver {
 	struct cdev cdev;
@@ -111,6 +118,21 @@ struct kgsl_driver {
 	struct mutex pt_mutex;
 
 	struct kgsl_pagetable *global_pt;
+	/* Size (in bytes) for each pagetable */
+	unsigned int ptsize;
+	/* The virtual address range for each pagetable as set by the
+	   platform */
+
+	unsigned int pt_va_size;
+	/* A structure for information about the pool of
+	   pagetable memory */
+	struct {
+		unsigned long *bitmap;
+		int entries;
+		spinlock_t lock;
+		void *hostptr;
+		unsigned int physaddr;
+	} ptpool;
 };
 
 extern struct kgsl_driver kgsl_driver;
@@ -163,6 +185,9 @@ void kgsl_remove_mem_entry(struct kgsl_mem_entry *entry, bool preserve);
 
 int kgsl_pwrctrl(unsigned int pwrflag);
 void kgsl_timer(unsigned long data);
+uint8_t *kgsl_sharedmem_convertaddr(struct kgsl_device *device,
+       unsigned int pt_base, unsigned int gpuaddr, unsigned int *size);
+
 void kgsl_idle_check(struct work_struct *work);
 int kgsl_idle(struct kgsl_device *device, unsigned int timeout);
 int kgsl_setstate(struct kgsl_device *device, uint32_t flags);
@@ -196,5 +221,15 @@ static inline void kgsl_drm_exit(void)
 {
 }
 #endif
+
+static inline int kgsl_gpuaddr_in_memdesc(const struct kgsl_memdesc *memdesc,
+				unsigned int gpuaddr)
+{
+	if (gpuaddr >= memdesc->gpuaddr && (gpuaddr + sizeof(unsigned int)) <=
+		(memdesc->gpuaddr + memdesc->size)) {
+		return 1;
+	}
+	return 0;
+}
 
 #endif /* _GSL_DRIVER_H */

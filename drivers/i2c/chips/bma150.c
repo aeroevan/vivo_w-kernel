@@ -39,6 +39,8 @@ static atomic_t PhoneOn_flag = ATOMIC_INIT(0);
 #define DEVICE_ACCESSORY_ATTR(_name, _mode, _show, _store) \
 struct device_attribute dev_attr_##_name = __ATTR(_name, _mode, _show, _store)
 
+static char update_user_calibrate_data;
+
 static int BMA_I2C_RxData(char *rxData, int length)
 {
 	int retry;
@@ -228,6 +230,7 @@ static int bma_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 	case BMA_IOCTL_WRITE:
 	case BMA_IOCTL_SET_MODE:
 	case BMA_IOCTL_SET_CALI_MODE:
+	case BMA_IOCTL_SET_UPDATE_USER_CALI_DATA:
 		if (copy_from_user(&rwbuf, argp, sizeof(rwbuf)))
 			return -EFAULT;
 		break;
@@ -302,6 +305,13 @@ static int bma_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 		if (pdata)
 			pdata->calibration_mode = rwbuf[0];
 		break;
+	case BMA_IOCTL_GET_UPDATE_USER_CALI_DATA:
+		temp = update_user_calibrate_data;
+		break;
+	case BMA_IOCTL_SET_UPDATE_USER_CALI_DATA:
+		update_user_calibrate_data = rwbuf[0];
+		break;
+
 	default:
 		return -ENOTTY;
 	}
@@ -328,6 +338,10 @@ static int bma_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 			return -EFAULT;
 		break;
 	case BMA_IOCTL_GET_CALI_MODE:
+		if (copy_to_user(argp, &temp, sizeof(temp)))
+			return -EFAULT;
+		break;
+	case BMA_IOCTL_GET_UPDATE_USER_CALI_DATA:
 		if (copy_to_user(argp, &temp, sizeof(temp)))
 			return -EFAULT;
 		break;

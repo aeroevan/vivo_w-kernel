@@ -184,6 +184,7 @@ struct kgsl_ringbuffer {
 	do { \
 		writel(data, ring); \
 		ring++; \
+		wmb(); \
 	} while (0)
 
 /* timestamp */
@@ -209,6 +210,7 @@ struct kgsl_ringbuffer {
 #define GSL_RB_GET_READPTR(rb, data) \
 	do { \
 		*(data) = (rb)->memptrs->rptr; \
+		rmb(); \
 	} while (0)
 #else
 #define GSL_RB_CNTL_NO_UPDATE 0x1 /* disable */
@@ -222,7 +224,7 @@ struct kgsl_ringbuffer {
 #ifdef GSL_RB_USE_WPTR_POLLING
 #define GSL_RB_CNTL_POLL_EN 0x1 /* enable */
 #define GSL_RB_UPDATE_WPTR_POLLING(rb) \
-	do { (rb)->memptrs->wptr_poll = (rb)->wptr; } while (0)
+	do { writel((rb)->wptr, &((rb)->memptrs->wptr_poll)); } while (0)
 #else
 #define GSL_RB_CNTL_POLL_EN 0x0 /* disable */
 #define GSL_RB_UPDATE_WPTR_POLLING(rb)
@@ -263,5 +265,13 @@ int kgsl_ringbuffer_gettimestampshadow(struct kgsl_device *device,
 void kgsl_ringbuffer_watchdog(struct kgsl_device *device);
 
 void kgsl_cp_intrcallback(struct kgsl_device *device);
+
+static inline int kgsl_ringbuffer_count(struct kgsl_ringbuffer *rb,
+	unsigned int rptr)
+{
+	if (rb->wptr >= rptr)
+		return rb->wptr - rptr;
+	return rb->wptr + rb->sizedwords - rptr;
+}
 
 #endif  /* __GSL_RINGBUFFER_H */
