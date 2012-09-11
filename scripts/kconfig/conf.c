@@ -164,6 +164,7 @@ static int conf_sym(struct menu *menu)
 		if (sym->name)
 			printf("(%s) ", sym->name);
 		type = sym_get_type(sym);
+		(void)type;
 		putchar('[');
 		oldval = sym_get_tristate_value(sym);
 		switch (oldval) {
@@ -233,6 +234,7 @@ static int conf_choice(struct menu *menu)
 
 	sym = menu->sym;
 	type = sym_get_type(sym);
+	(void)type;
 	is_new = !sym_has_value(sym);
 	if (sym_is_changable(sym)) {
 		conf_sym(menu);
