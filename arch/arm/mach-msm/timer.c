@@ -497,6 +497,7 @@ void msm_timer_exit_idle(int low_power)
 		if (!(readl(clock->regbase + TIMER_ENABLE) & TIMER_ENABLE_EN)) {
 			writel(TIMER_ENABLE_EN, clock->regbase + TIMER_ENABLE);
 			smem_clock = msm_timer_sync_smem_clock(1);
+            (void)smem_clock;
 		}
 		msm_timer_reactivate_alarm(clock);
 	}
